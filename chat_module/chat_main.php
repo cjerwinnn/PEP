@@ -290,36 +290,42 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
         cursor: pointer;
     }
 
+    
+
     @media (max-width: 768px) {
         #chat-container {
             flex-direction: column;
+            height: 90vh;
+            /* Or another appropriate height */
         }
 
         .sidebar-panel {
             width: 100% !important;
-            height: auto !important;
+            height: 50% !important;
+            /* Employee list takes half screen */
             border-right: none;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tab-content.active {
+            flex-grow: 1;
+            min-height: 0;
+            overflow-y: auto;
+            display: block !important;
         }
 
         #chat-box {
             width: 100% !important;
-            height: 100% !important;
+            height: 50% !important;
+            /* Chat area takes other half */
+            display: flex;
+            flex-direction: column;
         }
 
         #tab-buttons {
-            display: none !important;
-        }
-
-        .tab-content {
-            display: none !important;
-        }
-
-        .tab-content.mobile-active {
-            display: block !important;
-        }
-
-        #messages {
-            max-height: 50vh;
+            display: flex !important;
         }
     }
 </style>
@@ -362,13 +368,6 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
 <div class="container-fluid vh-95">
 
     <div id="chat-container">
-        <div class="d-md-none p-2 border-bottom bg-white">
-            <select class="form-select" id="mobileTabSelect">
-                <option value="inbox-tab">Inbox</option>
-                <option value="user-tab">Employees</option>
-            </select>
-        </div>
-
         <div class="sidebar-panel" style="width: 25%; border-right: 1px solid #ccc; background: #f9f9f9; display: flex; flex-direction: column; height: 90vh;">
             <div id="tab-buttons" class="d-flex border-bottom">
                 <button class="tab-btn active-tab" data-target="inbox-tab">Inbox</button>
@@ -385,17 +384,22 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
                 <div id="user-list">Loading employees...</div>
             </div>
         </div>
+
         <div id="chat-box">
+
             <div id="chat-header" class="d-flex align-items-center p-2 border-bottom bg-muted" style="display: none;">
                 <img src="assets/imgs/user_default.png" id="chat-header-pic" class="profile-pic me-2 border-2" alt="Profile">
                 <strong id="chat-header-name"></strong>
             </div>
+
             <div id="messages"></div>
+
             <form id="chat-form">
                 <input type="hidden" id="sender" value="<?php echo htmlspecialchars($user_id); ?>">
                 <input type="hidden" id="receiver">
                 <div class="d-flex flex-column w-100">
                     <div class="d-flex align-items-center">
+
                         <div class="attachment-input-wrapper me-2">
                             <label for="attachment-input" class="btn btn-outline-secondary btn-sm px-2 py-1 rounded-circle" style="font-size: 1.2em; cursor: pointer; margin-bottom: 0;">📎</label>
                             <input type="file" id="attachment-input" accept="image/jpeg,image/png,image/gif,application/pdf" style="display: none;">
