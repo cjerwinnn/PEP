@@ -144,20 +144,14 @@ function setupChatFormSubmit() {
     // Handle file selection and preview
     attachmentInput.addEventListener('change', function () {
         if (this.files.length > 0) {
-<<<<<<< HEAD
             selectedAttachmentFile = this.files[0];
             attachmentPreview.innerHTML = '';
-=======
-            selectedAttachmentFile = this.files[0]; // Store the file
-            attachmentPreview.innerHTML = ''; // Clear previous preview
->>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
 
             const file = selectedAttachmentFile;
             const reader = new FileReader();
             const previewItem = document.createElement('div');
             previewItem.classList.add('attachment-preview-item');
 
-<<<<<<< HEAD
             let previewContent = '';
             if (file.type.startsWith('image/')) {
                 reader.onload = function (e) {
@@ -167,26 +161,10 @@ function setupChatFormSubmit() {
                         selectedAttachmentFile = null;
                         attachmentInput.value = '';
                         attachmentPreview.innerHTML = '';
-=======
-            // START: MODIFIED SECTION
-            let previewContent = '';
-            if (file.type.startsWith('image/')) {
-                reader.onload = function (e) {
-                    // The 'attachment-icon' class will be styled by the new CSS for a small thumbnail
-                    previewContent = `<img src="${e.target.result}" class="attachment-icon" alt="Preview"> <span>${file.name}</span> <span class="remove-attachment" data-type="clear">&times;</span>`;
-                    previewItem.innerHTML = previewContent;
-
-                    // Add click listener to remove button after content is set
-                    previewItem.querySelector('.remove-attachment').addEventListener('click', function () {
-                        selectedAttachmentFile = null;
-                        attachmentInput.value = ''; // Clear file input
-                        attachmentPreview.innerHTML = ''; // Clear preview
->>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
                     });
                 };
                 reader.readAsDataURL(file);
             } else {
-<<<<<<< HEAD
                 const iconSrc = file.type === 'application/pdf' ? 'assets/icons/pdf-icon.png' : 'assets/icons/file-icon.png';
                 previewContent = `<img src="<span class="math-inline">\{iconSrc\}" class\="attachment\-icon" alt\="File Icon"\> <span\></span>{file.name}</span> <span class="remove-attachment" data-type="clear">&times;</span>`;
                 previewItem.innerHTML = previewContent;
@@ -197,24 +175,6 @@ function setupChatFormSubmit() {
                 });
             }
             attachmentPreview.appendChild(previewItem);
-=======
-                // For non-image files like PDF or others
-                const iconSrc = file.type === 'application/pdf' ? 'assets/icons/pdf-icon.png' : 'assets/icons/file-icon.png';
-                previewContent = `<img src="${iconSrc}" class="attachment-icon" alt="File Icon"> <span>${file.name}</span> <span class="remove-attachment" data-type="clear">&times;</span>`;
-                previewItem.innerHTML = previewContent;
-
-                // Add click listener to remove button
-                previewItem.querySelector('.remove-attachment').addEventListener('click', function () {
-                    selectedAttachmentFile = null;
-                    attachmentInput.value = ''; // Clear file input
-                    attachmentPreview.innerHTML = ''; // Clear preview
-                });
-            }
-            // END: MODIFIED SECTION
-
-            attachmentPreview.appendChild(previewItem);
-
->>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
         } else {
             selectedAttachmentFile = null;
             attachmentPreview.innerHTML = '';
@@ -330,10 +290,6 @@ function attachMessageDeleteHandlers() {
 }
 
 // Attachment Viewer Functions
-<<<<<<< HEAD
-
-=======
->>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
 function attachAttachmentViewers() {
     const viewerModal = document.getElementById('attachment-viewer-modal');
     const viewerImage = document.getElementById('viewer-image');
@@ -341,29 +297,6 @@ function attachAttachmentViewers() {
     const viewerFilename = document.getElementById('viewer-filename');
     const closeBtn = document.querySelector('.attachment-viewer-close');
 
-<<<<<<< HEAD
-    if (closeBtn) {
-        closeBtn.onclick = function() {
-            viewerModal.classList.remove('show');
-            viewerImage.src = '';
-            viewerImage.style.display = 'none';
-            viewerPdf.src = '';
-            viewerPdf.style.display = 'none';
-            viewerFilename.textContent = '';
-        };
-    }
-
-    if (viewerModal) {
-        viewerModal.addEventListener('click', function(event) {
-            if (event.target === viewerModal) {
-                closeBtn.click();
-            }
-        });
-    }
-
-    document.querySelectorAll('.message-attachment').forEach(attachmentDiv => {
-        attachmentDiv.addEventListener('click', function() {
-=======
     // Close modal when close button is clicked
     closeBtn.onclick = function () {
         viewerModal.classList.remove('show');
@@ -383,36 +316,15 @@ function attachAttachmentViewers() {
 
     document.querySelectorAll('.message-attachment').forEach(attachmentDiv => {
         attachmentDiv.addEventListener('click', function () {
->>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
             const src = this.getAttribute('data-src');
             const type = this.getAttribute('data-type');
             const filename = this.getAttribute('data-filename');
 
-<<<<<<< HEAD
-            if(viewerFilename) {
-                viewerFilename.textContent = filename;
-            }
-
-=======
             viewerFilename.textContent = filename;
->>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
 
             if (type.startsWith('image/')) {
                 viewerImage.src = src;
                 viewerImage.style.display = 'block';
-<<<<<<< HEAD
-                viewerPdf.style.display = 'none';
-            } else if (type === 'application/pdf') {
-                viewerPdf.src = src;
-                viewerPdf.style.display = 'block';
-                viewerImage.style.display = 'none';
-            }
-
-            if(viewerModal) {
-                viewerModal.classList.add('show');
-            }
-
-=======
                 viewerPdf.style.display = 'none'; // Hide PDF viewer
             } else if (type === 'application/pdf') {
                 viewerPdf.src = src;
@@ -420,15 +332,10 @@ function attachAttachmentViewers() {
                 viewerImage.style.display = 'none'; // Hide image viewer
             }
             viewerModal.classList.add('show');
->>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
         });
     });
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
 function setupTabSwitching() {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
