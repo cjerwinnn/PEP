@@ -57,6 +57,9 @@ foreach ($messages as $msg) {
     $bubbleAlignment = $isSender ? 'ms-auto' : 'me-auto';
     $imgSrc = $isSender ? $sender_picture : $receiver_picture;
 
+    $sender_name = $msg['sender_name'];
+    $receiver_name = $msg['receiver_name'];
+
     $messageText = htmlspecialchars($msg['message']);
     $timestamp = strtotime($msg['sent_at']);
     if (!$timestamp) continue;
