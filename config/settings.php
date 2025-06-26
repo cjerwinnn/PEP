@@ -13,5 +13,5 @@ function GetASF($conn) {
     }
 }
 
-// editeddasdasda
+// hahah
 ?>
