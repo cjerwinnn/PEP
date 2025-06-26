@@ -388,6 +388,7 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
 
         <div id="chat-box">
             <div id="messages"></div>
+            
             <form id="chat-form">
                 <input type="hidden" id="sender" value="<?php echo htmlspecialchars($user_id); ?>">
                 <input type="hidden" id="receiver">

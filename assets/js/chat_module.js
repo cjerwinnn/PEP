@@ -42,27 +42,24 @@ function fetchEmployees(searchTerm = '') {
         });
 }
 
-function setupUserSearch() {
-    const searchInput = document.getElementById('userSearchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            fetchEmployees(this.value);
-        });
-    }
-}
-
 function fetchInbox() {
     fetch('chat_module/fetch_inbox.php', {
         method: 'GET'
     })
         .then(response => response.text())
         .then(data => {
-            document.getElementById('inbox-list').innerHTML = data;
-            attachUserClickHandlers();
+            const inboxList = document.getElementById('inbox-list');
+            if(inboxList) {
+                inboxList.innerHTML = data;
+                attachUserClickHandlers();
+            }
 
         })
         .catch(error => {
-            document.getElementById('inbox-list').innerHTML = '<p>Error loading inbox.</p>';
+            const inboxList = document.getElementById('inbox-list');
+            if(inboxList) {
+                inboxList.innerHTML = '<p>Error loading inbox.</p>';
+            }
             console.error('Fetch error:', error);
         });
 }
@@ -88,10 +85,9 @@ function attachUserClickHandlers() {
                 clearInterval(refreshIntervalId);
             }
 
-            // refreshIntervalId = setInterval(() => {
-            //     lastMessageId = 0;
-            //     loadChatMessages(receiverId, false);
-            // }, 1000);
+            refreshIntervalId = setInterval(() => {
+                loadChatMessages(receiverId, false);
+            }, 1000);
         });
     });
 }
@@ -164,7 +160,7 @@ function setupChatFormSubmit() {
             let previewContent = '';
             if (file.type.startsWith('image/')) {
                 reader.onload = function (e) {
-                    previewContent = `<img src="<span class="math-inline">\{e\.target\.result\}" class\="attachment\-icon" alt\="Preview"\> <span\></span>{file.name}</span> <span class="remove-attachment" data-type="clear">&times;</span>`;
+                    previewContent = `<img src="${e.target.result}" class="attachment-icon" alt="Preview"> <span>${file.name}</span> <span class="remove-attachment" data-type="clear">&times;</span>`;
                     previewItem.innerHTML = previewContent;
                     previewItem.querySelector('.remove-attachment').addEventListener('click', function () {
                         selectedAttachmentFile = null;
@@ -175,7 +171,8 @@ function setupChatFormSubmit() {
                 reader.readAsDataURL(file);
             } else {
                 const iconSrc = file.type === 'application/pdf' ? 'assets/icons/pdf-icon.png' : 'assets/icons/file-icon.png';
-                previewContent = `<img src="<span class="math-inline">\{iconSrc\}" class\="attachment\-icon" alt\="File Icon"\> <span\></span>{file.name}</span> <span class="remove-attachment" data-type="clear">&times;</span>`;
+                const style = file.type === 'application/pdf' ? 'style="width: 30px; height: auto;"' : '';
+                previewContent = `<img src="${iconSrc}" class="attachment-icon" ${style} alt="File Icon"> <span>${file.name}</span> <span class="remove-attachment" data-type="clear">&times;</span>`;
                 previewItem.innerHTML = previewContent;
                 previewItem.querySelector('.remove-attachment').addEventListener('click', function () {
                     selectedAttachmentFile = null;
@@ -301,14 +298,16 @@ function attachMessageDeleteHandlers() {
 // Attachment Viewer Functions
 function attachAttachmentViewers() {
     const viewerModal = document.getElementById('attachment-viewer-modal');
+    if (!viewerModal) return;
+
     const viewerImage = document.getElementById('viewer-image');
     const viewerPdf = document.getElementById('viewer-pdf');
     const viewerFilename = document.getElementById('viewer-filename');
-    const closeBtn = document.querySelector('.attachment-viewer-close');
+    const closeBtn = viewerModal.querySelector('.attachment-viewer-close');
 
     // Close modal when close button is clicked
     closeBtn.onclick = function () {
-        viewerModal.classList.remove('show');
+        viewerModal.style.display = "none";
         viewerImage.src = ''; // Clear image
         viewerImage.style.display = 'none'; // Hide image
         viewerPdf.src = ''; // Clear PDF
@@ -324,10 +323,13 @@ function attachAttachmentViewers() {
     });
 
     document.querySelectorAll('.message-attachment').forEach(attachmentDiv => {
-        attachmentDiv.addEventListener('click', function () {
+        attachmentDiv.addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent default link behavior
             const src = this.getAttribute('data-src');
             const type = this.getAttribute('data-type');
             const filename = this.getAttribute('data-filename');
+
+            if (!src || !type) return;
 
             viewerFilename.textContent = filename;
 
@@ -335,12 +337,16 @@ function attachAttachmentViewers() {
                 viewerImage.src = src;
                 viewerImage.style.display = 'block';
                 viewerPdf.style.display = 'none'; // Hide PDF viewer
+                viewerModal.style.display = "block";
             } else if (type === 'application/pdf') {
                 viewerPdf.src = src;
                 viewerPdf.style.display = 'block';
                 viewerImage.style.display = 'none'; // Hide image viewer
+                viewerModal.style.display = "block";
+            } else {
+                // For other file types, you might want to just open the link in a new tab
+                window.open(src, '_blank');
             }
-            viewerModal.classList.add('show');
         });
     });
 }
@@ -364,19 +370,13 @@ function setupTabSwitching() {
     });
 }
 
-function enableSearch(inputId, listContainerId, itemClass) {
-    const input = document.getElementById(inputId);
-    if (!input) return;
-
-    input.addEventListener('input', function () {
-        const searchTerm = this.value.toLowerCase();
-        const items = document.querySelectorAll(`#${listContainerId} .${itemClass}`);
-
-        items.forEach(item => {
-            const text = item.textContent.toLowerCase();
-            item.style.display = text.includes(searchTerm) ? '' : 'none';
+function setupUserSearch() {
+    const searchInput = document.getElementById('userSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            fetchEmployees(this.value);
         });
-    });
+    }
 }
 
 
@@ -429,21 +429,15 @@ function setupReactionPopup() {
             currentMessageId = btn.getAttribute('data-id');
 
             const rect = btn.getBoundingClientRect();
-            popup.style.top = (window.scrollY + rect.bottom + 5) + 'px';
+            // Position the popup above and to the right of the button
+            popup.style.top = (window.scrollY + rect.top - popup.offsetHeight - 5) + 'px';
             popup.style.left = (window.scrollX + rect.left) + 'px';
             popup.style.display = 'block';
         });
     });
 
     const reactionMap = {
-        '1': '👍',
-        '2': '❤️',
-        '3': '😂',
-        '4': '😮',
-        '5': '😢',
-        '6': '🔥',
-        '7': '🎉',
-        '8': '😡',
+        '1': '👍', '2': '❤️', '3': '😂', '4': '😮', '5': '😢', '6': '🔥', '7': '🎉', '8': '😡',
     };
 
     popup.querySelectorAll('.reaction-choice').forEach(span => {
