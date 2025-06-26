@@ -129,11 +129,12 @@ function reinitializeMessageDropdowns() {
     const dropdownToggles = document.querySelectorAll('#messages [data-bs-toggle="dropdown"]');
     dropdownToggles.forEach(toggle => {
         if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+            // Check if a dropdown instance already exists
             const existingDropdown = bootstrap.Dropdown.getInstance(toggle);
-            if (existingDropdown) {
-                existingDropdown.dispose();
+            if (!existingDropdown) {
+                // Only create a new dropdown if one doesn't exist
+                new bootstrap.Dropdown(toggle);
             }
-            new bootstrap.Dropdown(toggle);
         } else {
             console.warn("Bootstrap Dropdown JS not found. Ensure Bootstrap's JavaScript is loaded.");
         }

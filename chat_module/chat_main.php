@@ -385,16 +385,17 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
                 <div id="user-list">Loading employees...</div>
             </div>
         </div>
-
         <div id="chat-box">
+            <div id="chat-header" class="d-flex align-items-center p-2 border-bottom bg-muted" style="display: none;">
+                <img src="assets/imgs/user_default.png" id="chat-header-pic" class="profile-pic me-2 border-2" alt="Profile">
+                <strong id="chat-header-name"></strong>
+            </div>
             <div id="messages"></div>
-            
             <form id="chat-form">
                 <input type="hidden" id="sender" value="<?php echo htmlspecialchars($user_id); ?>">
                 <input type="hidden" id="receiver">
                 <div class="d-flex flex-column w-100">
                     <div class="d-flex align-items-center">
-
                         <div class="attachment-input-wrapper me-2">
                             <label for="attachment-input" class="btn btn-outline-secondary btn-sm px-2 py-1 rounded-circle" style="font-size: 1.2em; cursor: pointer; margin-bottom: 0;">📎</label>
                             <input type="file" id="attachment-input" accept="image/jpeg,image/png,image/gif,application/pdf" style="display: none;">
