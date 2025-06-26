@@ -77,6 +77,7 @@ foreach ($messages as $msg) {
     $attachmentType = htmlspecialchars($msg['attachment_type'] ?? '');
     $attachmentHtml = '';
 
+<<<<<<< HEAD
 
     if (!empty($attachmentPath)) {
         // Adjust path for client-side access.
@@ -106,6 +107,37 @@ foreach ($messages as $msg) {
         }
     }
 
+=======
+    if (!empty($attachmentPath)) {
+        // Adjust path for client-side access. Assuming 'uploads/' is directly accessible from web root.
+        $fullAttachmentUrl = '/' .$project_name . '/' . $attachmentPath; // <-- This is the key change
+        $filename = basename($attachmentPath); // Get just the filename
+
+        if (str_starts_with($attachmentType, 'image/')) {
+            $attachmentHtml = "
+                <div class='message-attachment' data-src='{$fullAttachmentUrl}' data-type='{$attachmentType}' data-filename='{$filename}'>
+                    <img src='{$fullAttachmentUrl}' alt='Attached Image'>
+                </div>";
+        } elseif ($attachmentType === 'application/pdf') {
+            $attachmentHtml = "
+                <div class='message-attachment' data-src='{$fullAttachmentUrl}' data-type='{$attachmentType}' data-filename='{$filename}'>
+                    <a href='{$fullAttachmentUrl}' target='_blank' style='color:inherit; text-decoration:none;'>
+                        <img src='assets/icons/pdf-icon.png' alt='PDF' class='attachment-icon'> {$filename}
+                    </a>
+                </div>";
+        } else {
+            // For other file types, provide a generic file icon and a download link
+            $attachmentHtml = "
+                <div class='message-attachment' data-src='{$fullAttachmentUrl}' data-type='{$attachmentType}' data-filename='{$filename}'>
+                    <a href='{$fullAttachmentUrl}' target='_blank' style='color:inherit; text-decoration:none;'>
+                        <img src='assets/icons/file-icon.png' alt='File' class='attachment-icon'> {$filename}
+                    </a>
+                </div>";
+        }
+    }
+
+
+>>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
     echo "<div class='d-flex w-100 align-items-end mb-3' data-message-id='{$msg['id']}'>";
 
     // Receiver image

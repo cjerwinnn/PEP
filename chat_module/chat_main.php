@@ -123,6 +123,7 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
         max-width: 100%;
         word-break: break-word;
     }
+<<<<<<< HEAD
 
     /* Styles for the image attachment within a chat bubble */
     .message-attachment img {
@@ -136,6 +137,16 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
         /* Optional: for rounded corners */
         cursor: pointer;
         /* Indicates it can be clicked */
+=======
+    
+    /* Styles for the image attachment within a chat bubble */
+    .message-attachment img {
+        max-width: 100%;      /* Ensures image is never wider than its container */
+        max-height: 250px;    /* Prevents very tall images from taking up too much space */
+        height: auto;         /* Maintains aspect ratio */
+        border-radius: 8px;   /* Optional: for rounded corners */
+        cursor: pointer;      /* Indicates it can be clicked */
+>>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
     }
 
     /* Styles for the attachment preview area before sending */
@@ -156,10 +167,15 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
 
     /* Styles for the small image thumbnail in the preview */
     .attachment-preview-item .attachment-icon {
+<<<<<<< HEAD
         max-width: 50px;
         /* Set a max width for the preview thumbnail */
         max-height: 50px;
         /* Set a max height for the preview thumbnail */
+=======
+        max-width: 50px;     /* Set a max width for the preview thumbnail */
+        max-height: 50px;    /* Set a max height for the preview thumbnail */
+>>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
         object-fit: cover;
         border-radius: 4px;
         margin-right: 8px;
@@ -247,6 +263,7 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
         text-align: center;
     }
 
+<<<<<<< HEAD
     .modal-viewer {
         display: none;
         position: fixed;
@@ -290,6 +307,8 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
         cursor: pointer;
     }
 
+=======
+>>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
     @media (max-width: 768px) {
         #chat-container {
             flex-direction: column;
@@ -345,6 +364,7 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
 </div>
 
 
+<<<<<<< HEAD
 <div id="attachment-viewer-modal" class="modal-viewer">
     <div class="modal-viewer-content">
         <div class="modal-viewer-header">
@@ -359,6 +379,8 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
 </div>
 
 
+=======
+>>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
 <div class="container-fluid vh-95">
 
     <div id="chat-container">
