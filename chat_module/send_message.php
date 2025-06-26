@@ -87,7 +87,3 @@ if ($stmt->execute()) {
 
 $stmt->close();
 $conn->close();
-<<<<<<< HEAD
-=======
-?>
->>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
