@@ -13,5 +13,5 @@ function GetASF($conn) {
     }
 }
 
-// testhhh
+// test
 ?>
