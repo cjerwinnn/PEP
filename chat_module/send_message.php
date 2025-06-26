@@ -23,11 +23,7 @@ if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] == UPLOAD_ERR
     $file_size = $_FILES['attachment']['size'];
 
     // Basic validation
-<<<<<<< HEAD
     $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf']; // Add 'application/pdf'
-=======
-    $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
->>>>>>> 06b95ea615e0c6633d114500752a4081b56d7ba6
     $max_size = 5 * 1024 * 1024; // 5 MB
 
     if (!in_array($file_type, $allowed_types)) {
