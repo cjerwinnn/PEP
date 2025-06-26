@@ -26,20 +26,29 @@ function Chat_FetchEmployeeList(targetId, url) {
         });
 }
 
-function fetchEmployees() {
-    fetch('chat_module/fetch_employees.php', {
+function fetchEmployees(searchTerm = '') {
+    const url = `chat_module/fetch_employees.php?search=${encodeURIComponent(searchTerm)}`;
+    fetch(url, {
         method: 'GET'
     })
         .then(response => response.text())
         .then(data => {
             document.getElementById('user-list').innerHTML = data;
             attachUserClickHandlers();
-            enableSearch('userSearchInput', 'user-list', 'employee-item');
         })
         .catch(error => {
             document.getElementById('user-list').innerHTML = '<p>Error loading employees.</p>';
             console.error('Fetch error:', error);
         });
+}
+
+function setupUserSearch() {
+    const searchInput = document.getElementById('userSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            fetchEmployees(this.value);
+        });
+    }
 }
 
 function fetchInbox() {

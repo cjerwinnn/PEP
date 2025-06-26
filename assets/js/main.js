@@ -218,6 +218,8 @@ function Load_ChatDesk() {
       fetchInbox()
       setupTabSwitching();
       setupChatFormSubmit()
+      setupUserSearch(); // Add this line to initialize the search functionality
+
     })
     .catch(error => {
       document.getElementById('main-content').innerHTML = '<p>Error loading request view.</p>';
