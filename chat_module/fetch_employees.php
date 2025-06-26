@@ -8,11 +8,11 @@ $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 if (!empty($searchTerm)) {
     // Add wildcards for a 'LIKE' search
     $searchTermSQL = '%' . $searchTerm . '%';
-    // It's recommended to create a new Stored Procedure for searching
-    $sql = "SELECT employeeid, Employee_Name, picture FROM employee_master WHERE Employee_Name LIKE ? OR employeeid LIKE ?";
+    $sql = "CALL CHAT_EMPLOYEE_SEARCH(?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $searchTermSQL, $searchTermSQL);
+    $stmt->bind_param("s", $searchTermSQL);
 } else {
+    // If no search term, fetch all employees
     $sql = "CALL CHAT_EMPLOYEE_LIST()";
     $stmt = $conn->prepare($sql);
 }

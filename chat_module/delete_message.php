@@ -18,31 +18,59 @@ if (empty($message_id)) {
     exit;
 }
 
+// First, get the attachment path from the database before deleting the message
+$stmt_select = $conn->prepare("SELECT attachment_path FROM chat_messages WHERE id = ? AND sender_id = ?");
+if (!$stmt_select) {
+    http_response_code(500);
+    echo 'Prepare failed for select: ' . $conn->error;
+    exit;
+}
+$stmt_select->bind_param("is", $message_id, $user_id);
+if (!$stmt_select->execute()) {
+    http_response_code(500);
+    echo 'Execute failed for select: ' . $stmt_select->error;
+    exit;
+}
+
+$result = $stmt_select->get_result();
+$attachment_path = null;
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $attachment_path = $row['attachment_path'];
+}
+$stmt_select->close();
+
+
 // Prepare and execute a SQL DELETE statement
 // IMPORTANT: This query allows a user to only delete THEIR OWN message.
 // If it's an admin feature, remove `AND sender_id = ?` and add admin role checks.
-$stmt = $conn->prepare("DELETE FROM chat_messages WHERE id = ? AND sender_id = ?");
-if (!$stmt) {
+$stmt_delete = $conn->prepare("DELETE FROM chat_messages WHERE id = ? AND sender_id = ?");
+if (!$stmt_delete) {
     http_response_code(500);
     echo 'Prepare failed: ' . $conn->error;
     exit;
 }
 
-$stmt->bind_param("is", $message_id, $user_id); // 'i' for int (message_id), 's' for string (user_id)
+$stmt_delete->bind_param("is", $message_id, $user_id);
 
-if ($stmt->execute()) {
-    if ($stmt->affected_rows > 0) {
+if ($stmt_delete->execute()) {
+    if ($stmt_delete->affected_rows > 0) {
+        if (!empty($attachment_path)) {
+            $file_to_delete = '../' . $attachment_path;
+            if (file_exists($file_to_delete)) {
+                unlink($file_to_delete);
+            }
+        }
         echo 'Message deleted successfully.';
     } else {
-        // Message not found, or user is not the sender
-        http_response_code(404); // Not Found (if ID doesn't exist) or Forbidden (if user not sender)
+        http_response_code(404); 
         echo 'Message not found or you are not authorized to delete this message.';
     }
 } else {
     http_response_code(500); // Internal Server Error
-    echo 'Failed to delete message: ' . $stmt->error;
+    echo 'Failed to delete message: ' . $stmt_delete->error;
 }
 
-$stmt->close();
+$stmt_delete->close();
 $conn->close();
 ?>

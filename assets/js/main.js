@@ -220,6 +220,8 @@ function Load_ChatDesk() {
       setupChatFormSubmit()
       setupUserSearch(); // Add this line to initialize the search functionality
 
+      inboxRefreshInterval = setInterval(fetchInbox, 5000); // Refresh every 5 seconds
+
     })
     .catch(error => {
       document.getElementById('main-content').innerHTML = '<p>Error loading request view.</p>';
