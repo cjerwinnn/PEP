@@ -1,6 +1,3 @@
-
-
-
 function Chat_FetchEmployeeList(targetId, url) {
     const container = document.getElementById(targetId);
 
@@ -140,12 +137,16 @@ function loadChatMessages(receiverId, scroll = false) {
 }
 
 function setupMessageOptionsModal() {
-    const modalElement = document.getElementById('messageOptionsModal');
-    if (!modalElement) return;
+    const messageOptionsModalElement = document.getElementById('messageOptionsModal');
+    const deleteConfirmationModalElement = document.getElementById('deleteConfirmationModal');
 
-    const messageOptionsModal = new bootstrap.Modal(modalElement);
+    if (!messageOptionsModalElement || !deleteConfirmationModalElement) return;
+
+    const messageOptionsModal = new bootstrap.Modal(messageOptionsModalElement);
+    const deleteConfirmationModal = new bootstrap.Modal(deleteConfirmationModalElement);
     let currentMessageId = null;
 
+    // Delegate event listener to the messages container
     const messagesContainer = document.getElementById('messages');
     if (!messagesContainer.dataset.modalListenerAttached) {
         messagesContainer.addEventListener('click', function (event) {
@@ -153,8 +154,10 @@ function setupMessageOptionsModal() {
             if (button) {
                 currentMessageId = button.dataset.id;
                 const isSender = button.dataset.isSender === '1';
-                const deleteOption = modalElement.querySelector('#modal-option-delete');
-                deleteOption.style.display = isSender ? 'block' : 'none';
+                const deleteOption = messageOptionsModalElement.querySelector('#modal-option-delete');
+                if (deleteOption) {
+                    deleteOption.style.display = isSender ? 'block' : 'none';
+                }
                 messageOptionsModal.show();
             }
         });
@@ -162,16 +165,64 @@ function setupMessageOptionsModal() {
     }
 
 
-    // --- Action Handlers for Modal Buttons ---
+    // Handle click on the modal's delete option
+    const modalDeleteOption = messageOptionsModalElement.querySelector('#modal-option-delete');
+    if (modalDeleteOption) {
+        modalDeleteOption.addEventListener('click', function (e) {
+            e.preventDefault();
+            messageOptionsModal.hide();
+            // Now, show the confirmation modal
+            deleteConfirmationModal.show();
+        });
+    }
 
-    // Reply Action
-    modalElement.querySelector('#modal-option-reply').addEventListener('click', function (e) {
-        e.preventDefault();
-        messageOptionsModal.hide();
-        const messageElement = document.querySelector(`[data-message-id='${currentMessageId}'] .fw-normal`);
-        const messageBubble = document.querySelector(`[data-message-id='${currentMessageId}']`);
+    // Handle the final confirmation from the new modal
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', function () {
+            if (currentMessageId) {
+                const receiverId = document.getElementById('receiver').value;
+                const formData = new URLSearchParams();
+                formData.append('id', currentMessageId);
 
-        console.log(currentMessageId);
+                fetch('chat_module/delete_message.php', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                })
+                    .then(response => response.text())
+                    .then(result => {
+                        if (result.includes('Message deleted successfully.')) {
+                            loadChatMessages(receiverId, false);
+                        } else {
+                            alert('Error deleting message: ' + result);
+                        }
+                    })
+                    .catch(error => console.error('Delete message error:', error));
+            }
+            deleteConfirmationModal.hide();
+            currentMessageId = null; // Reset after deletion
+        });
+    }
+}
+
+function setupChatFormSubmit() {
+    const chatForm = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message');
+    const attachmentInput = document.getElementById('attachment-input');
+    const attachmentPreview = document.getElementById('attachment-preview');
+    let replyingToMessageId = null;
+    let selectedAttachmentFile = null;
+
+    // Listen to reply action
+    document.getElementById('modal-option-reply').addEventListener('click', function () {
+        const messageOptionsModal = bootstrap.Modal.getInstance(document.getElementById('messageOptionsModal'));
+        if (messageOptionsModal) {
+            messageOptionsModal.hide();
+        }
+        const messageId = document.querySelector('#messageOptionsModal').dataset.messageId; // Correctly get the messageId
+        const messageElement = document.querySelector(`[data-message-id='${messageId}'] .fw-normal`);
+        const messageBubble = document.querySelector(`[data-message-id='${messageId}']`);
 
         if (messageElement && messageBubble) {
             const isSender = messageBubble.classList.contains('message-sent');
@@ -180,73 +231,8 @@ function setupMessageOptionsModal() {
             document.getElementById('reply-to-name').innerText = replyToName;
             document.getElementById('reply-to-text').innerText = messageElement.innerText;
             document.getElementById('reply-to-container').style.display = 'block';
-            replyingToMessageId = currentMessageId;
-            document.getElementById('message').focus();
-        }
-    });
-
-    // Cancel Reply Action
-    const cancelReplyButton = document.getElementById('cancel-reply');
-    if (cancelReplyButton) {
-        cancelReplyButton.addEventListener('click', function () {
-            document.getElementById('reply-to-container').style.display = 'none';
-            replyingToMessageId = null;
-        });
-    }
-
-    // Delete Action
-    modalElement.querySelector('#modal-option-delete').addEventListener('click', function (e) {
-        e.preventDefault();
-        messageOptionsModal.hide();
-        if (currentMessageId && confirm('Are you sure you want to delete this message?')) {
-            const receiverId = document.getElementById('receiver').value;
-            const formData = new URLSearchParams();
-            formData.append('id', currentMessageId);
-
-            fetch('chat_module/delete_message.php', {
-                method: 'POST',
-                body: formData,
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-            })
-                .then(response => response.text())
-                .then(result => {
-                    if (result.includes('Message deleted successfully.')) {
-                        loadChatMessages(receiverId, false);
-                    } else {
-                        alert('Error deleting message: ' + result);
-                    }
-                })
-                .catch(error => console.error('Delete message error:', error));
-        }
-    });
-
-    // Forward Action
-    modalElement.querySelector('#modal-option-forward').addEventListener('click', function (e) {
-        e.preventDefault();
-        messageOptionsModal.hide();
-        alert(`Forwarding message ID: ${currentMessageId}`);
-        // Add your forward logic here
-    });
-}
-
-function setupChatFormSubmit() {
-    const chatForm = document.getElementById('chat-form');
-    const messageInput = document.getElementById('message');
-    const attachmentInput = document.getElementById('attachment-input');
-    const attachmentPreview = document.getElementById('attachment-preview');
-    let replyingToMessageId = null; 
-
-    // Listen to reply action
-    document.querySelector('#modal-option-reply').addEventListener('click', function () {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('messageOptionsModal'));
-        modal.hide();
-        const messageId = document.querySelector('.message-options-btn[data-id]').dataset.id; // Re-fetch the message id from a reliable source if needed
-        const messageElement = document.querySelector(`[data-message-id='${messageId}'] .fw-normal`);
-
-        if (messageElement) {
             replyingToMessageId = messageId;
-            document.getElementById('reply-to-container').style.display = 'block';
-            document.getElementById('reply-to-text').innerText = messageElement.innerText;
+            document.getElementById('message').focus();
         }
     });
 
@@ -254,6 +240,7 @@ function setupChatFormSubmit() {
         replyingToMessageId = null;
         document.getElementById('reply-to-container').style.display = 'none';
     });
+
 
     attachmentInput.addEventListener('change', function () {
         if (this.files.length > 0) {
@@ -296,7 +283,7 @@ function setupChatFormSubmit() {
     });
 
 
-     chatForm.addEventListener('submit', function (e) {
+    chatForm.addEventListener('submit', function (e) {
         e.preventDefault();
 
         const senderId = document.getElementById('sender').value;
@@ -333,7 +320,7 @@ function setupChatFormSubmit() {
                     selectedAttachmentFile = null;
                     attachmentInput.value = '';
                     attachmentPreview.innerHTML = '';
-                    
+
                     // Reset reply state
                     replyingToMessageId = null;
                     document.getElementById('reply-to-container').style.display = 'none';
