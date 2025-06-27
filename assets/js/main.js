@@ -240,9 +240,6 @@ function Load_ChatDesk() {
       updateUserStatuses();
 
       inboxRefreshInterval = setInterval(fetchInbox, 5000); // Refresh every 5 seconds
-
-      UpdateOnlineStatus = setInterval(updateUserStatuses, 0); // Refresh every 5 seconds
-
     })
     .catch(error => {
       document.getElementById('main-content').innerHTML = '<p>Error loading request view.</p>';

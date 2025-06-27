@@ -1,4 +1,4 @@
-let inboxRefreshInterval = null; 
+let inboxRefreshInterval = null;
 
 function Chat_FetchEmployeeList(targetId, url) {
     const container = document.getElementById(targetId);
@@ -621,4 +621,93 @@ function updateUserStatuses() {
             }
         })
         .catch(error => console.error('Error fetching user statuses:', error));
+}
+
+function openCreateGroupModal() {
+    let createGroupModal = new bootstrap.Modal(document.getElementById('createGroupModal'));
+    fetch('chat_module/fetch_employees.php')
+        .then(response => response.text())
+        .then(html => {
+            // Modify the fetched HTML to include checkboxes
+            const userListHtml = html.replace(/<div class="employee-item/g, '<div class="form-check employee-item');
+            const withCheckboxes = userListHtml.replace(/<img/g, '<input class="form-check-input" type="checkbox" value-id="$1" id="user-$1"><img');
+            document.getElementById('group-members-list').innerHTML = withCheckboxes;
+        });
+    createGroupModal.show();
+}
+
+// Global event listener for 'Create Group' button
+document.addEventListener('click', function (e) {
+    if (e.target && e.target.id === 'create-group-btn') {
+        openCreateGroupModal();
+    }
+});
+
+// Event listener for the create group form submission
+const createGroupForm = document.getElementById('create-group-form');
+if (createGroupForm) {
+    createGroupForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const groupName = document.getElementById('group-name-input').value;
+        const selectedMembers = document.querySelectorAll('#group-members-list .form-check-input:checked');
+        const userIds = Array.from(selectedMembers).map(cb => cb.getAttribute('value-id'));
+
+        if (!groupName.trim() || userIds.length === 0) {
+            alert('Please provide a group name and select at least one member.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('group_name', groupName);
+        formData.append('user_ids', JSON.stringify(userIds));
+
+        fetch('chat_module/create_group.php', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.text())
+            .then(result => {
+                alert(result);
+                bootstrap.Modal.getInstance(document.getElementById('createGroupModal')).hide();
+                fetchGroups();
+            })
+            .catch(error => console.error('Error creating group:', error));
+    });
+}
+
+function fetchGroups() {
+    fetch('chat_module/fetch_groups.php')
+        .then(response => response.text())
+        .then(data => {
+            const groupList = document.getElementById('group-list');
+            if (groupList) {
+                groupList.innerHTML = data;
+                // Add click handlers for each group
+                document.querySelectorAll('.group-item').forEach(item => {
+                    item.addEventListener('click', function () {
+                        const groupId = this.dataset.id;
+                        const groupName = this.dataset.name;
+                        const groupPic = this.dataset.pic || 'assets/imgs/group-default.png';
+
+                        document.getElementById('receiver').value = '';
+                        document.getElementById('group_id').value = groupId;
+
+                        const chatHeader = document.getElementById('chat-header');
+                        const chatHeaderPic = document.getElementById('chat-header-pic');
+                        const chatHeaderName = document.getElementById('chat-header-name');
+
+                        if (chatHeader) chatHeader.style.display = 'flex';
+                        if (chatHeaderPic) chatHeaderPic.src = groupPic;
+                        if (chatHeaderName) chatHeaderName.innerHTML = groupName;
+
+                        document.querySelectorAll('.employee-item, .group-item').forEach(u => u.classList.remove('selected'));
+                        this.classList.add('selected');
+
+                        lastMessageId = 0;
+                        loadGroupMessages(groupId, true);
+                    });
+                });
+            }
+        })
+        .catch(error => console.error('Error fetching groups:', error));
 }

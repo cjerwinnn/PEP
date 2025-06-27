@@ -7,6 +7,9 @@ $receiver_id = isset($_POST['receiver_id']) ? $_POST['receiver_id'] : '';
 $message = isset($_POST['message']) ? trim($_POST['message']) : '';
 $reply_to_message_id = isset($_POST['reply_to_message_id']) ? $_POST['reply_to_message_id'] : null;
 
+$group_id = isset($_POST['group_id']) ? $_POST['group_id'] : null;
+$receiver_id = isset($_POST['receiver_id']) ? $_POST['receiver_id'] : null;
+
 $attachment_path = null;
 $attachment_type = null;
 
@@ -82,6 +85,17 @@ if ($stmt->execute()) {
 } else {
     http_response_code(500);
     echo "Failed to send message: " . $stmt->error;
+}
+
+if ($group_id) {
+    $sql = "INSERT INTO chat_messages (sender_id, group_id, message, sent_at) VALUES (?, ?, ?, NOW())";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sis", $sender_id, $group_id, $message);
+} else {
+    // Your existing code for one-to-one messages
+    $sql = "INSERT INTO chat_messages (sender_id, receiver_id, message, sent_at) VALUES (?, ?, ?, NOW())";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sss", $sender_id, $receiver_id, $message);
 }
 
 $stmt->close();

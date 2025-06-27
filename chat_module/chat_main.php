@@ -309,29 +309,6 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
         border: 2px solid
     }
 
-    .status-indicator {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        margin-left: 8px;
-        vertical-align: middle;
-        transition: background-color 0.3s ease;
-    }
-
-    .status-online {
-        background-color: #28a745;
-        /* Green for online */
-        box-shadow: 0 0 5px #28a745;
-    }
-
-    .status-offline {
-        background-color: #6c757d;
-        /* Gray for offline */
-    }
-
-
-
     @media (max-width: 768px) {
         #chat-container {
             flex-direction: column;
@@ -439,6 +416,37 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
     </div>
 </div>
 
+<!-- Create Group Modal -->
+<div class="modal fade" id="createGroupModal" tabindex="-1" aria-labelledby="createGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createGroupModalLabel">Create New Group</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="create-group-form">
+                    <div class="mb-3">
+                        <label for="group-name-input" class="form-label">Group Name</label>
+                        <input type="text" class="form-control rounded-4" id="group-name-input" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Select Members</label>
+                        <div id="group-members-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #ced4da; padding: 10px; border-radius: .375rem;">
+                            <!-- Employee list will be dynamically loaded here -->
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary rounded-4" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary rounded-4">Create Group</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <div class="container-fluid vh-95">
 
@@ -447,7 +455,13 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
             <div id="tab-buttons" class="d-flex border-bottom">
                 <button class="tab-btn active-tab" data-target="inbox-tab">Inbox</button>
                 <button class="tab-btn" data-target="user-tab">Employees</button>
-                <button class="tab-btn" data-target="group-tab">Tickets</button>
+                <button class="tab-btn" data-target="group-tab">GROUPS</button>
+            </div>
+
+            <div id="group-tab" class="tab-content p-2">
+                <button id="create-group-btn" class="btn btn-primary btn-sm mb-2">Create Group</button>
+                <div id="group-list">
+                </div>
             </div>
 
             <div id="inbox-tab" class="tab-content active p-2">
