@@ -289,6 +289,47 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
         cursor: pointer;
     }
 
+    .profile-pic,
+    .chat-profile-pic {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #ccc;
+        /* Adds a gray border */
+    }
+
+    .profile-pic:hover,
+    .chat-profile-pic:hover {
+        border-color: #0d6efd;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid
+    }
+
+    .status-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-left: 8px;
+        vertical-align: middle;
+        transition: background-color 0.3s ease;
+    }
+
+    .status-online {
+        background-color: #28a745;
+        /* Green for online */
+        box-shadow: 0 0 5px #28a745;
+    }
+
+    .status-offline {
+        background-color: #6c757d;
+        /* Gray for offline */
+    }
+
 
 
     @media (max-width: 768px) {
@@ -359,13 +400,12 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
             <div class="modal-body">
                 <div class="list-group list-group-flush">
                     <a href="#" class="list-group-item list-group-item-action" id="modal-option-reply">Reply</a>
-                    <a href="#" class="list-group-item list-group-item-action" id="modal-option-forward">Forward</a>
                     <a href="#" class="list-group-item list-group-item-action text-danger" id="modal-option-delete">Delete Message</a>
                 </div>
             </div>
         </div>
     </div>
-    </div>
+</div>
 
 
 <div id="attachment-viewer-modal" class="modal-viewer">

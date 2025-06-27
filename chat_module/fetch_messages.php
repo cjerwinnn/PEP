@@ -2,6 +2,17 @@
 include '../config/connection.php';
 session_start();
 
+if (isset($_SESSION['employeeid'])) {
+    $user_id = $_SESSION['employeeid'];
+    $update_sql = "UPDATE hris_live_db.system_users SET last_activity = NOW() WHERE user = ?";
+    $update_stmt = $conn->prepare($update_sql);
+    if ($update_stmt) {
+        $update_stmt->bind_param('s', $user_id);
+        $update_stmt->execute();
+        $update_stmt->close();
+    }
+}
+
 $sender_id = $_SESSION['employeeid'] ?? '';
 $receiver_id = $_GET['receiver_id'] ?? '';
 $project_name = 'PEP';
@@ -46,7 +57,14 @@ $stmt->close();
 $conn->close();
 
 $reactionMap = [
-    '1' => '👍', '2' => '❤️', '3' => '😂', '4' => '😮', '5' => '😢', '6' => '🔥', '7' => '🎉', '8' => '😡',
+    '1' => '👍',
+    '2' => '❤️',
+    '3' => '😂',
+    '4' => '😮',
+    '5' => '😢',
+    '6' => '🔥',
+    '7' => '🎉',
+    '8' => '😡',
 ];
 
 date_default_timezone_set('Asia/Manila');
@@ -56,6 +74,9 @@ foreach ($messages as $msg) {
     $class = $isSender ? 'bg-primary text-white' : 'bg-light text-dark';
     $bubbleAlignment = $isSender ? 'ms-auto' : 'me-auto';
     $imgSrc = $isSender ? $sender_picture : $receiver_picture;
+
+    $senderName = 'You'; // Assuming you don't have the sender's full name here.
+    $receiverName = htmlspecialchars($receiver_pic_row['Employee_Name'] ?? 'Receiver');
 
     $messageText = htmlspecialchars($msg['message']);
     $timestamp = strtotime($msg['sent_at']);
@@ -81,7 +102,10 @@ foreach ($messages as $msg) {
     }
 
     echo "<div class='d-flex w-100 align-items-end mb-3' data-message-id='{$msg['id']}'>";
-    if (!$isSender) echo "<img src='{$imgSrc}' class='rounded-circle me-2' width='36' height='36' alt='Profile'>";
+    if (!$isSender) {
+        echo "<img src='{$imgSrc}' class='profile-pic rounded-circle me-2' width='36' height='36' alt='Profile' title='{$receiverName}'>";
+    }
+
     echo "<div class='position-relative p-3 rounded-3 shadow-sm {$class} {$bubbleAlignment}' style='max-width: 75%; min-width: 150px;'>";
 
     echo "<div class='position-absolute top-0 end-0 mt-1 me-1 d-flex gap-1'>";
@@ -112,7 +136,8 @@ foreach ($messages as $msg) {
     }
 
     echo "</div>";
-    if ($isSender) echo "<img src='{$imgSrc}' class='rounded-circle ms-2' width='36' height='36' alt='Profile'>";
+    if ($isSender) {
+        echo "<img src='{$imgSrc}' class='profile-pic rounded-circle ms-2' width='36' height='36' alt='Profile' title='{$senderName}'>";
+    }
     echo "</div>";
 }
-?>

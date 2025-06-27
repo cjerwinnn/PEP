@@ -50,16 +50,14 @@ while ($row = $result->fetch_assoc()) {
     }
 
     echo '
-    <div class="employee-item d-flex align-items-center p-2 border-bottom" data-id="' . $employeeid . '" data-name="' . $employee_name . '" data-pic="' . $imgSrc . '">
-        <img src="' . $imgSrc . '" class="profile-pic me-2" alt="Profile">
-        <div>
-            <strong>[' . $employeeid . ']</strong><br>
-            ' . $employee_name . '
-        </div>
-    </div>';
+<div class="employee-item d-flex align-items-center p-2 border-bottom" data-id="' . $employeeid . '" data-name="' . $employee_name . '" data-pic="' . $imgSrc . '">
+    <img src="' . $imgSrc . '" class="profile-pic me-2" alt="Profile" title="' . $employee_name . '">
+    <div>
+        <strong>[' . $employeeid . ']</strong><br>
+        ' . $employee_name . '<span class="status-indicator status-offline" id="status-' . $employeeid . '"></span>
+    </div>
+</div>';
 }
 
 
 $conn->close();
-
-?>

@@ -218,9 +218,13 @@ function Load_ChatDesk() {
       fetchInbox()
       setupTabSwitching();
       setupChatFormSubmit()
-      setupUserSearch(); // Add this line to initialize the search functionality
+      setupUserSearch();
+
+      updateUserStatuses();
 
       inboxRefreshInterval = setInterval(fetchInbox, 5000); // Refresh every 5 seconds
+
+      UpdateOnlineStatus = setInterval(updateUserStatuses, 0); // Refresh every 5 seconds
 
     })
     .catch(error => {

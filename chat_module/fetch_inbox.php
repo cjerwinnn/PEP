@@ -38,14 +38,14 @@ while ($row = $result->fetch_assoc()) {
     }
 
     echo '
-    <div class="employee-item d-flex justify-content-between align-items-center border-bottom p-2" data-id="' . $employeeid . '" data-name="' . $employee_name . '" data-pic="' . $imgSrc . '">
-        <div class="d-flex align-items-center">
-            <img src="' . $imgSrc . '" class="profile-pic me-2" alt="Profile">
-            <div>
-                <strong>[' . $employeeid . ']</strong><br>
-                ' . $employee_name . '
-            </div>
+<div class="employee-item d-flex justify-content-between align-items-center border-bottom p-2" data-id="' . $employeeid . '" data-name="' . $employee_name . '" data-pic="' . $imgSrc . '">
+    <div class="d-flex align-items-center">
+        <img src="' . $imgSrc . '" class="profile-pic me-2" alt="Profile" title="' . $employee_name . '">
+        <div>
+            <strong>[' . $employeeid . ']</strong><br>
+            ' . $employee_name . '<span class="status-indicator status-offline" id="status-inbox-' . $employeeid . '"></span>
         </div>
+    </div>
         <div class="dropdown">
             <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 &#8942;
@@ -60,5 +60,3 @@ while ($row = $result->fetch_assoc()) {
 
 $stmt_employee->close();
 $conn->close();
-
-?>

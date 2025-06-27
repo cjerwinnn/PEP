@@ -84,7 +84,10 @@ function attachUserClickHandlers() {
             const chatHeaderName = document.getElementById('chat-header-name');
 
             if (chatHeader) chatHeader.style.display = 'flex';
-            if (chatHeaderPic) chatHeaderPic.src = receiverPic;
+            if (chatHeaderPic) {
+                chatHeaderPic.src = receiverPic;
+                chatHeaderPic.title = receiverName; // Add this line
+            }
             if (chatHeaderName) chatHeaderName.innerHTML = `[${receiverId}] ${receiverName}`;
 
 
@@ -169,8 +172,6 @@ function setupMessageOptionsModal() {
         const messageElement = document.querySelector(`[data-message-id='${currentMessageId}'] .fw-normal`);
         const messageBubble = document.querySelector(`[data-message-id='${currentMessageId}']`);
 
-        console.log(currentMessageId);
-
         if (messageElement && messageBubble) {
             const isSender = messageBubble.classList.contains('message-sent');
             const replyToName = isSender ? 'You' : document.getElementById('chat-header-name').innerText.split('] ')[1];
@@ -216,14 +217,6 @@ function setupMessageOptionsModal() {
                 })
                 .catch(error => console.error('Delete message error:', error));
         }
-    });
-
-    // Forward Action
-    modalElement.querySelector('#modal-option-forward').addEventListener('click', function (e) {
-        e.preventDefault();
-        messageOptionsModal.hide();
-        alert(`Forwarding message ID: ${currentMessageId}`);
-        // Add your forward logic here
     });
 }
 
@@ -593,4 +586,37 @@ function setupReactionPopup() {
             currentMessageId = null;
         }
     });
+}
+
+function updateUserStatuses() {
+    const userItems = document.querySelectorAll('.employee-item');
+    if (userItems.length === 0) return;
+
+    const userIds = [...new Set(Array.from(userItems).map(item => item.dataset.id))];
+
+    if (userIds.length === 0) return;
+
+    const formData = new FormData();
+    formData.append('user_ids', JSON.stringify(userIds));
+
+    fetch('chat_module/fetch_user_status.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(statuses => {
+            for (const userId in statuses) {
+                const indicators = document.querySelectorAll(`#status-${userId}, #status-inbox-${userId}`);
+                indicators.forEach(indicator => {
+                    if (statuses[userId]) {
+                        indicator.classList.remove('status-offline');
+                        indicator.classList.add('status-online');
+                    } else {
+                        indicator.classList.remove('status-online');
+                        indicator.classList.add('status-offline');
+                    }
+                });
+            }
+        })
+        .catch(error => console.error('Error fetching user statuses:', error));
 }
