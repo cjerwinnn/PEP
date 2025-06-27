@@ -132,7 +132,7 @@ $img_src = isValidBase64Image($picture)
 
                         <!-- Logout -->
                         <li>
-                            <a class="dropdown-item py-2 px-3 rounded-3 d-flex align-items-center gap-2 text-danger hover-bg-danger" href="functions/whp_logout.php">
+                            <a id="logout-link" class="dropdown-item py-2 px-3 rounded-3 d-flex align-items-center gap-2 text-danger hover-bg-danger" href="functions/whp_logout.php">
                                 <i class="bi bi-box-arrow-right text-danger"></i>
                                 <span class="fw-medium">Logout</span>
                             </a>

@@ -1,3 +1,5 @@
+let inboxRefreshInterval = null; 
+
 function Chat_FetchEmployeeList(targetId, url) {
     const container = document.getElementById(targetId);
 

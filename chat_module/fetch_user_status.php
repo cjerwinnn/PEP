@@ -23,7 +23,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 $statuses = [];
-$active_threshold = 5000; // 5 minutes in seconds
+$active_threshold = 10; // 5 minutes in seconds
 
 date_default_timezone_set('Asia/Manila');
 

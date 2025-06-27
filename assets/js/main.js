@@ -49,6 +49,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
   });
+
+  // Handle logout to clear chat interval
+  const logoutLink = document.getElementById('logout-link');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', function (e) {
+      e.preventDefault(); // Stop the link from redirecting immediately
+
+      // Clear the chat refresh interval if it exists
+      if (typeof inboxRefreshInterval !== 'undefined' && inboxRefreshInterval) {
+        clearInterval(inboxRefreshInterval);
+        inboxRefreshInterval = null; // Clean up the variable
+      }
+
+      // Now, proceed to the logout page
+      window.location.href = this.href;
+    });
+  }
 });
 
 

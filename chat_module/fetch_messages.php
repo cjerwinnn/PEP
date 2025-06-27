@@ -2,6 +2,13 @@
 include '../config/connection.php';
 session_start();
 
+// Add this security check at the top
+if (!isset($_SESSION['employeeid'])) {
+    http_response_code(403); // Forbidden
+    echo 'Unauthorized. Please log in.';
+    exit; // Stop script execution
+}
+
 if (isset($_SESSION['employeeid'])) {
     $user_id = $_SESSION['employeeid'];
     $update_sql = "UPDATE hris_live_db.system_users SET last_activity = NOW() WHERE user = ?";
@@ -13,9 +20,15 @@ if (isset($_SESSION['employeeid'])) {
     }
 }
 
-$sender_id = $_SESSION['employeeid'] ?? '';
+$sender_id = $_SESSION['employeeid'];
 $receiver_id = $_GET['receiver_id'] ?? '';
 $project_name = 'PEP';
+
+$update_stmt = $conn2->prepare("UPDATE system_users SET last_activity = NOW() WHERE user = ?");
+$update_stmt->bind_param('s', $sender_id);
+$update_stmt->execute();
+$update_stmt->close();
+$conn2->next_result(); // Clear the result set
 
 if (!$sender_id || !$receiver_id) {
     http_response_code(400);
