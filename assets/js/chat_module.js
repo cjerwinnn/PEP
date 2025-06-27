@@ -624,15 +624,47 @@ function updateUserStatuses() {
 }
 
 function openCreateGroupModal() {
-    let createGroupModal = new bootstrap.Modal(document.getElementById('createGroupModal'));
+    const modalElement = document.getElementById('createGroupModal');
+    const createGroupModal = new bootstrap.Modal(modalElement);
+    const userListContainer = document.getElementById('group-members-list');
+
     fetch('chat_module/fetch_employees.php')
         .then(response => response.text())
         .then(html => {
-            // Modify the fetched HTML to include checkboxes
-            const userListHtml = html.replace(/<div class="employee-item/g, '<div class="form-check employee-item');
-            const withCheckboxes = userListHtml.replace(/<img/g, '<input class="form-check-input" type="checkbox" value-id="$1" id="user-$1"><img');
-            document.getElementById('group-members-list').innerHTML = withCheckboxes;
+            userListContainer.innerHTML = ''; // Clear previous list
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+
+            tempDiv.querySelectorAll('.employee-item').forEach(item => {
+                const employeeId = item.dataset.id;
+                const employeeName = item.dataset.name;
+
+                const formCheckDiv = document.createElement('div');
+                formCheckDiv.className = 'form-check';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'form-check-input';
+                checkbox.value = employeeId;
+                checkbox.id = `user-check-${employeeId}`;
+
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = `user-check-${employeeId}`;
+                // This will take the inner HTML of the employee item (image, name, etc.)
+                // and put it inside the label.  Adjust if you only want the name.
+                label.innerHTML = item.innerHTML;
+
+                formCheckDiv.appendChild(checkbox);
+                formCheckDiv.appendChild(label);
+                userListContainer.appendChild(formCheckDiv);
+            });
+        })
+        .catch(error => {
+            userListContainer.innerHTML = '<p class="text-danger">Could not load users.</p>';
+            console.error('Error fetching employees for group modal:', error);
         });
+
     createGroupModal.show();
 }
 
@@ -647,10 +679,11 @@ document.addEventListener('click', function (e) {
 const createGroupForm = document.getElementById('create-group-form');
 if (createGroupForm) {
     createGroupForm.addEventListener('submit', function (e) {
+
         e.preventDefault();
         const groupName = document.getElementById('group-name-input').value;
         const selectedMembers = document.querySelectorAll('#group-members-list .form-check-input:checked');
-        const userIds = Array.from(selectedMembers).map(cb => cb.getAttribute('value-id'));
+        const userIds = Array.from(selectedMembers).map(cb => cb.value);
 
         if (!groupName.trim() || userIds.length === 0) {
             alert('Please provide a group name and select at least one member.');
