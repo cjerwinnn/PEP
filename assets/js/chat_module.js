@@ -49,7 +49,7 @@ function fetchInbox() {
         .then(response => response.text())
         .then(data => {
             const inboxList = document.getElementById('inbox-list');
-            if(inboxList) {
+            if (inboxList) {
                 inboxList.innerHTML = data;
                 attachUserClickHandlers();
             }
@@ -57,7 +57,7 @@ function fetchInbox() {
         })
         .catch(error => {
             const inboxList = document.getElementById('inbox-list');
-            if(inboxList) {
+            if (inboxList) {
                 inboxList.innerHTML = '<p>Error loading inbox.</p>';
             }
             console.error('Fetch error:', error);
@@ -71,7 +71,7 @@ let selectedAttachmentFile = null; // Global variable to hold the selected file
 function attachUserClickHandlers() {
     const users = document.querySelectorAll('.employee-item');
     users.forEach(user => {
-        user.addEventListener('click', function() {
+        user.addEventListener('click', function () {
             const receiverId = this.dataset.id;
             const receiverName = this.dataset.name;
             const receiverPic = this.dataset.pic;
@@ -126,10 +126,9 @@ function loadChatMessages(receiverId, scroll = false) {
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             }
 
-            setupMessageOptionsPopup();
+            setupMessageOptionsModal();
             setupReactionPopup();
-            attachMessageDeleteHandlers();
-            attachAttachmentViewers(); 
+            attachAttachmentViewers();
 
         })
         .catch(error => {
@@ -137,79 +136,72 @@ function loadChatMessages(receiverId, scroll = false) {
         });
 }
 
-function setupMessageOptionsPopup() {
-    const popup = document.getElementById('message-options-popup');
-    if (!popup) return;
+function setupMessageOptionsModal() {
+    const modalElement = document.getElementById('messageOptionsModal');
+    if (!modalElement) return;
 
+    const messageOptionsModal = new bootstrap.Modal(modalElement);
     let currentMessageId = null;
 
+    // Use a single event listener on the messages container
     const messagesContainer = document.getElementById('messages');
-    messagesContainer.addEventListener('click', function(event) {
-        const button = event.target.closest('.message-options-btn');
-        if (!button) return;
+    if (!messagesContainer.dataset.modalListenerAttached) {
+        messagesContainer.addEventListener('click', function (event) {
+            const button = event.target.closest('.message-options-btn');
+            if (button) {
+                currentMessageId = button.dataset.id;
+                const isSender = button.dataset.isSender === '1';
+                const deleteOption = modalElement.querySelector('#modal-option-delete');
+                deleteOption.style.display = isSender ? 'block' : 'none'; // Show delete only for sender
+                messageOptionsModal.show();
+            }
+        });
+        messagesContainer.dataset.modalListenerAttached = 'true';
+    }
 
-        event.stopPropagation();
-        currentMessageId = button.dataset.id;
-        const isSender = button.dataset.isSender === '1';
 
-        const deleteOption = popup.querySelector('#message-option-delete');
-        if (deleteOption) {
-            deleteOption.style.display = isSender ? 'block' : 'none';
-        }
+    // --- Action Handlers for Modal Buttons ---
 
-        const rect = button.getBoundingClientRect();
-        popup.style.top = (window.scrollY + rect.top - popup.offsetHeight - 5) + 'px';
-        popup.style.left = (window.scrollX + rect.left) + 'px';
-        popup.style.display = 'block';
-    });
-
-    popup.querySelector('#message-option-delete').addEventListener('click', function(e) {
+    // Delete Action
+    modalElement.querySelector('#modal-option-delete').addEventListener('click', function (e) {
         e.preventDefault();
-        popup.style.display = 'none';
-        if (currentMessageId) {
-            if (confirm('Are you sure you want to delete this message?')) {
-                const receiverId = document.getElementById('receiver').value;
-                const formData = new URLSearchParams();
-                formData.append('id', currentMessageId);
+        messageOptionsModal.hide();
+        if (currentMessageId && confirm('Are you sure you want to delete this message?')) {
+            const receiverId = document.getElementById('receiver').value;
+            const formData = new URLSearchParams();
+            formData.append('id', currentMessageId);
 
-                fetch('chat_module/delete_message.php', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
-                })
+            fetch('chat_module/delete_message.php', {
+                method: 'POST',
+                body: formData,
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            })
                 .then(response => response.text())
                 .then(result => {
-                        if (result.includes('Message deleted successfully.')) {
+                    if (result.includes('Message deleted successfully.')) {
                         loadChatMessages(receiverId, false);
                     } else {
-                        alert('Error: ' + result);
+                        alert('Error deleting message: ' + result);
                     }
                 })
-                .catch(error => {
-                    console.error('Delete message error:', error);
-                });
-            }
+                .catch(error => console.error('Delete message error:', error));
         }
     });
 
-        popup.querySelector('#message-option-reply').addEventListener('click', function(e) {
+    // Reply Action
+    modalElement.querySelector('#modal-option-reply').addEventListener('click', function (e) {
         e.preventDefault();
-        alert(`Replying to message: ${currentMessageId}`);
-        popup.style.display = 'none';
+        messageOptionsModal.hide();
+        alert(`Replying to message ID: ${currentMessageId}`);
+        // Add your reply logic here
     });
 
-    popup.querySelector('#message-option-forward').addEventListener('click', function(e) {
+    // Forward Action
+    modalElement.querySelector('#modal-option-forward').addEventListener('click', function (e) {
         e.preventDefault();
-        alert(`Forwarding message: ${currentMessageId}`);
-        popup.style.display = 'none';
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!popup.contains(e.target) && !e.target.closest('.message-options-btn')) {
-            popup.style.display = 'none';
-        }
+        messageOptionsModal.hide();
+        alert(`Forwarding message ID: ${currentMessageId}`);
+        // Add your forward logic here
     });
 }
 
@@ -386,7 +378,7 @@ function attachAttachmentViewers() {
 
     document.querySelectorAll('.message-attachment').forEach(attachmentDiv => {
         attachmentDiv.addEventListener('click', function (event) {
-            event.preventDefault(); 
+            event.preventDefault();
             const src = this.getAttribute('data-src');
             const type = this.getAttribute('data-type');
             const filename = this.getAttribute('data-filename');
@@ -434,7 +426,7 @@ function setupTabSwitching() {
 function setupUserSearch() {
     const searchInput = document.getElementById('userSearchInput');
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             fetchEmployees(this.value);
         });
     }

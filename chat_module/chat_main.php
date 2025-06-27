@@ -19,7 +19,6 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
         display: flex;
         width: 100%;
         height: 90vh;
-        overflow: hidden;
     }
 
     .user-item {
@@ -290,7 +289,7 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
         cursor: pointer;
     }
 
-    
+
 
     @media (max-width: 768px) {
         #chat-container {
@@ -348,6 +347,24 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
     <span class="reaction-choice" style="font-size: 24px; cursor: pointer; margin: 3px;" data-id="6">🔥</span>
     <span class="reaction-choice" style="font-size: 24px; cursor: pointer; margin: 3px;" data-id="7">🎉</span>
     <span class="reaction-choice" style="font-size: 24px; cursor: pointer; margin: 3px;" data-id="8">😡</span>
+</div>
+
+<div class="modal fade" id="messageOptionsModal" tabindex="-1" aria-labelledby="messageOptionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="messageOptionsModalLabel">Message Options</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action" id="modal-option-reply">Reply</a>
+                    <a href="#" class="list-group-item list-group-item-action" id="modal-option-forward">Forward</a>
+                    <a href="#" class="list-group-item list-group-item-action text-danger" id="modal-option-delete">Delete Message</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 

@@ -58,9 +58,6 @@ while ($row = $result->fetch_assoc()) {
     </div>';
 }
 
-
-
-
 $stmt_employee->close();
 $conn->close();
 
