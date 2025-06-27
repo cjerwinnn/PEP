@@ -32,7 +32,7 @@ $receiver_picture = (!empty($receiver_pic_row) && !empty($receiver_pic_row['pict
 $stmt_receiver->close();
 $conn->next_result();
 
-// Get messages
+// Get messages using the updated stored procedure
 $stmt = $conn->prepare("CALL CHAT_MESSAGES_DATA(?, ?)");
 $stmt->bind_param("ss", $sender_id, $receiver_id);
 $stmt->execute();
@@ -57,12 +57,8 @@ foreach ($messages as $msg) {
     $bubbleAlignment = $isSender ? 'ms-auto' : 'me-auto';
     $imgSrc = $isSender ? $sender_picture : $receiver_picture;
 
-    $sender_name = $msg['sender_name'];
-    $receiver_name = $msg['receiver_name'];
-
     $messageText = htmlspecialchars($msg['message']);
     $timestamp = strtotime($msg['sent_at']);
-
     $fullDateTime = date('F j, Y H:i', $timestamp);
     $rawReaction = $msg['reaction'] ?? '';
     $reactionEmoji = $reactionMap[$rawReaction] ?? $rawReaction;
@@ -94,6 +90,18 @@ foreach ($messages as $msg) {
         echo "<button class='btn btn-sm btn-outline-secondary px-1 py-0 reaction-popup-btn' data-id='{$msg['id']}' title='React'><i class='bi bi-emoji-smile'></i></button>";
     }
     echo "</div>";
+
+    // --- NEW: Render the reply snippet ---
+    $repliedMessage = htmlspecialchars($msg['replied_message'] ?? '');
+    $repliedSenderName = htmlspecialchars($msg['replied_sender_name'] ?? 'A message');
+
+    if (!empty($repliedMessage)) {
+        echo "<div class='reply-snippet' style='background-color: rgba(0,0,0,0.08); padding: 8px 10px; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid #0d6efd;'>";
+        echo "<strong class='small'>Replying to {$repliedSenderName}</strong>";
+        echo "<div class='small text-muted' style='white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'>{$repliedMessage}</div>";
+        echo "</div>";
+    }
+    // --- END of new code ---
 
     if (!empty($attachmentHtml)) echo $attachmentHtml;
     if (!empty($messageText)) echo "<div class='fw-normal pe-4' style='white-space: pre-line;'>{$messageText}</div>";

@@ -397,7 +397,7 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
             </div>
 
             <div id="user-tab" class="tab-content p-2">
-                <input type="text" class="form-control mb-2" id="userSearchInput" placeholder="Search users...">
+                <input type="text" class="form-control mb-2 rounded-4" id="userSearchInput" placeholder="Search users...">
                 <div id="user-list">Loading employees...</div>
             </div>
         </div>
@@ -410,13 +410,20 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
             </div>
 
             <div id="messages"></div>
-
             <form id="chat-form">
                 <input type="hidden" id="sender" value="<?php echo htmlspecialchars($user_id); ?>">
                 <input type="hidden" id="receiver">
                 <div class="d-flex flex-column w-100">
+                    <div id="reply-to-container" class="p-2" style="display: none; background-color: #e9ecef; border-radius: 8px 8px 0 0; border: 1px solid #ddd; border-bottom: none;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="small" style="overflow: hidden;">
+                                <strong class="text-primary">Replying to <span id="reply-to-name"></span></strong>
+                                <div id="reply-to-text" class="text-muted" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+                            </div>
+                            <button type="button" class="btn-close" id="cancel-reply" aria-label="Close"></button>
+                        </div>
+                    </div>
                     <div class="d-flex align-items-center">
-
                         <div class="attachment-input-wrapper me-2">
                             <label for="attachment-input" class="btn btn-outline-secondary btn-sm px-2 py-1 rounded-circle" style="font-size: 1.2em; cursor: pointer; margin-bottom: 0;">📎</label>
                             <input type="file" id="attachment-input" accept="image/jpeg,image/png,image/gif,application/pdf" style="display: none;">

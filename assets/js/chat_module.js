@@ -143,7 +143,6 @@ function setupMessageOptionsModal() {
     const messageOptionsModal = new bootstrap.Modal(modalElement);
     let currentMessageId = null;
 
-    // Use a single event listener on the messages container
     const messagesContainer = document.getElementById('messages');
     if (!messagesContainer.dataset.modalListenerAttached) {
         messagesContainer.addEventListener('click', function (event) {
@@ -152,7 +151,7 @@ function setupMessageOptionsModal() {
                 currentMessageId = button.dataset.id;
                 const isSender = button.dataset.isSender === '1';
                 const deleteOption = modalElement.querySelector('#modal-option-delete');
-                deleteOption.style.display = isSender ? 'block' : 'none'; // Show delete only for sender
+                deleteOption.style.display = isSender ? 'block' : 'none';
                 messageOptionsModal.show();
             }
         });
@@ -161,6 +160,34 @@ function setupMessageOptionsModal() {
 
 
     // --- Action Handlers for Modal Buttons ---
+
+    // Reply Action
+    modalElement.querySelector('#modal-option-reply').addEventListener('click', function (e) {
+        e.preventDefault();
+        messageOptionsModal.hide();
+        const messageElement = document.querySelector(`[data-message-id='${currentMessageId}'] .fw-normal`);
+        const messageBubble = document.querySelector(`[data-message-id='${currentMessageId}']`);
+
+        if (messageElement && messageBubble) {
+            const isSender = messageBubble.classList.contains('message-sent');
+            const replyToName = isSender ? 'You' : document.getElementById('chat-header-name').innerText.split('] ')[1];
+
+            document.getElementById('reply-to-name').innerText = replyToName;
+            document.getElementById('reply-to-text').innerText = messageElement.innerText;
+            document.getElementById('reply-to-container').style.display = 'block';
+            replyingToMessageId = currentMessageId;
+            document.getElementById('message').focus();
+        }
+    });
+
+    // Cancel Reply Action
+    const cancelReplyButton = document.getElementById('cancel-reply');
+    if (cancelReplyButton) {
+        cancelReplyButton.addEventListener('click', function () {
+            document.getElementById('reply-to-container').style.display = 'none';
+            replyingToMessageId = null;
+        });
+    }
 
     // Delete Action
     modalElement.querySelector('#modal-option-delete').addEventListener('click', function (e) {
@@ -188,14 +215,6 @@ function setupMessageOptionsModal() {
         }
     });
 
-    // Reply Action
-    modalElement.querySelector('#modal-option-reply').addEventListener('click', function (e) {
-        e.preventDefault();
-        messageOptionsModal.hide();
-        alert(`Replying to message ID: ${currentMessageId}`);
-        // Add your reply logic here
-    });
-
     // Forward Action
     modalElement.querySelector('#modal-option-forward').addEventListener('click', function (e) {
         e.preventDefault();
@@ -210,6 +229,25 @@ function setupChatFormSubmit() {
     const messageInput = document.getElementById('message');
     const attachmentInput = document.getElementById('attachment-input');
     const attachmentPreview = document.getElementById('attachment-preview');
+    let replyingToMessageId = null; // Variable to hold the replied message ID
+
+    // Listen to reply action
+    document.querySelector('#modal-option-reply').addEventListener('click', function () {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('messageOptionsModal'));
+        modal.hide();
+        const messageId = document.querySelector('.message-options-btn[data-id]').dataset.id; // Re-fetch the message id from a reliable source if needed
+        const messageElement = document.querySelector(`[data-message-id='${messageId}'] .fw-normal`);
+        if (messageElement) {
+            replyingToMessageId = messageId;
+            document.getElementById('reply-to-container').style.display = 'block';
+            document.getElementById('reply-to-text').innerText = messageElement.innerText;
+        }
+    });
+
+    document.getElementById('cancel-reply').addEventListener('click', function () {
+        replyingToMessageId = null;
+        document.getElementById('reply-to-container').style.display = 'none';
+    });
 
     attachmentInput.addEventListener('change', function () {
         if (this.files.length > 0) {
@@ -252,7 +290,7 @@ function setupChatFormSubmit() {
     });
 
 
-    chatForm.addEventListener('submit', function (e) {
+     chatForm.addEventListener('submit', function (e) {
         e.preventDefault();
 
         const senderId = document.getElementById('sender').value;
@@ -274,6 +312,9 @@ function setupChatFormSubmit() {
         if (selectedAttachmentFile) {
             formData.append('attachment', selectedAttachmentFile);
         }
+        if (replyingToMessageId) {
+            formData.append('reply_to_message_id', replyingToMessageId);
+        }
 
         fetch('chat_module/send_message.php', {
             method: 'POST',
@@ -286,6 +327,10 @@ function setupChatFormSubmit() {
                     selectedAttachmentFile = null;
                     attachmentInput.value = '';
                     attachmentPreview.innerHTML = '';
+                    
+                    // Reset reply state
+                    replyingToMessageId = null;
+                    document.getElementById('reply-to-container').style.display = 'none';
 
                     lastMessageId = 0;
                     loadChatMessages(receiverId, true);

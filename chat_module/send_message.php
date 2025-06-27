@@ -5,6 +5,7 @@ session_start();
 $sender_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
 $receiver_id = isset($_POST['receiver_id']) ? $_POST['receiver_id'] : '';
 $message = isset($_POST['message']) ? trim($_POST['message']) : '';
+$reply_to_message_id = isset($_POST['reply_to_message_id']) ? $_POST['reply_to_message_id'] : null;
 
 $attachment_path = null;
 $attachment_type = null;
@@ -14,6 +15,7 @@ if (!$sender_id || !$receiver_id) {
     echo 'Missing sender or receiver ID.';
     exit;
 }
+
 
 // Check for file upload
 if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] == UPLOAD_ERR_OK) {
@@ -63,20 +65,17 @@ if (empty($message) && empty($attachment_path)) {
     exit;
 }
 
-// Insert message into DB
-// Modified SQL to include attachment_path and attachment_type
-$sql = "INSERT INTO chat_messages (sender_id, receiver_id, message, sent_at, attachment_path, attachment_type) VALUES (?, ?, ?, NOW(), ?, ?)";
-
+// Update the SQL query and bind_param
+$sql = "INSERT INTO chat_messages (sender_id, receiver_id, message, sent_at, attachment_path, attachment_type, reply_to_message_id) VALUES (?, ?, ?, NOW(), ?, ?, ?)";
 $stmt = $conn->prepare($sql);
+
 if (!$stmt) {
     http_response_code(500);
     echo 'Prepare failed: ' . $conn->error;
     exit;
 }
 
-// Use 'sssss' for bind_param (sender_id, receiver_id, message, attachment_path, attachment_type)
-// All these fields are expected to be strings.
-$stmt->bind_param("sssss", $sender_id, $receiver_id, $message, $attachment_path, $attachment_type);
+$stmt->bind_param("sssssi", $sender_id, $receiver_id, $message, $attachment_path, $attachment_type, $reply_to_message_id);
 
 if ($stmt->execute()) {
     echo "Message sent";
