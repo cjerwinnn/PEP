@@ -71,12 +71,25 @@ let selectedAttachmentFile = null; // Global variable to hold the selected file
 function attachUserClickHandlers() {
     const users = document.querySelectorAll('.employee-item');
     users.forEach(user => {
-        user.addEventListener('click', () => {
-            const receiverId = user.getAttribute('data-id');
+        user.addEventListener('click', function() {
+            const receiverId = this.dataset.id;
+            const receiverName = this.dataset.name;
+            const receiverPic = this.dataset.pic;
+
             document.getElementById('receiver').value = receiverId;
 
+            // Update chat header
+            const chatHeader = document.getElementById('chat-header');
+            const chatHeaderPic = document.getElementById('chat-header-pic');
+            const chatHeaderName = document.getElementById('chat-header-name');
+
+            if (chatHeader) chatHeader.style.display = 'flex';
+            if (chatHeaderPic) chatHeaderPic.src = receiverPic;
+            if (chatHeaderName) chatHeaderName.innerHTML = `[${receiverId}] ${receiverName}`;
+
+
             users.forEach(u => u.classList.remove('selected'));
-            user.classList.add('selected');
+            this.classList.add('selected');
 
             lastMessageId = 0;
             loadChatMessages(receiverId, true);
@@ -91,6 +104,7 @@ function attachUserClickHandlers() {
         });
     });
 }
+
 
 function loadChatMessages(receiverId, scroll = false) {
     const url = `chat_module/fetch_messages.php?receiver_id=${encodeURIComponent(receiverId)}`;

@@ -38,7 +38,7 @@ while ($row = $result->fetch_assoc()) {
     }
 
     echo '
-    <div class="employee-item d-flex justify-content-between align-items-center border-bottom p-2" data-id="' . $employeeid . '">
+    <div class="employee-item d-flex justify-content-between align-items-center border-bottom p-2" data-id="' . $employeeid . '" data-name="' . $employee_name . '" data-pic="' . $imgSrc . '">
         <div class="d-flex align-items-center">
             <img src="' . $imgSrc . '" class="profile-pic me-2" alt="Profile">
             <div>
@@ -63,3 +63,5 @@ while ($row = $result->fetch_assoc()) {
 
 $stmt_employee->close();
 $conn->close();
+
+?>

@@ -18,7 +18,7 @@ $stmt_sender->bind_param("s", $sender_id);
 $stmt_sender->execute();
 $result_sender = $stmt_sender->get_result();
 $sender_pic_row = $result_sender->fetch_assoc();
-$sender_picture = !empty($sender_pic_row['picture']) ? 'data:image/jpeg;base64,' . base64_encode($sender_pic_row['picture']) : 'assets/imgs/user_default.png';
+$sender_picture = (!empty($sender_pic_row) && !empty($sender_pic_row['picture'])) ? 'data:image/jpeg;base64,' . base64_encode($sender_pic_row['picture']) : 'assets/imgs/user_default.png';
 $stmt_sender->close();
 $conn->next_result();
 
@@ -28,7 +28,7 @@ $stmt_receiver->bind_param("s", $receiver_id);
 $stmt_receiver->execute();
 $result_receiver = $stmt_receiver->get_result();
 $receiver_pic_row = $result_receiver->fetch_assoc();
-$receiver_picture = !empty($receiver_pic_row['picture']) ? 'data:image/jpeg;base64,' . base64_encode($receiver_pic_row['picture']) : 'assets/imgs/user_default.png';
+$receiver_picture = (!empty($receiver_pic_row) && !empty($receiver_pic_row['picture'])) ? 'data:image/jpeg;base64,' . base64_encode($receiver_pic_row['picture']) : 'assets/imgs/user_default.png';
 $stmt_receiver->close();
 $conn->next_result();
 
@@ -62,7 +62,6 @@ foreach ($messages as $msg) {
 
     $messageText = htmlspecialchars($msg['message']);
     $timestamp = strtotime($msg['sent_at']);
-    if (!$timestamp) continue;
 
     $fullDateTime = date('F j, Y H:i', $timestamp);
     $rawReaction = $msg['reaction'] ?? '';
