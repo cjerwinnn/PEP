@@ -1,3 +1,6 @@
+
+
+
 function Chat_FetchEmployeeList(targetId, url) {
     const container = document.getElementById(targetId);
 
@@ -168,6 +171,8 @@ function setupMessageOptionsModal() {
         const messageElement = document.querySelector(`[data-message-id='${currentMessageId}'] .fw-normal`);
         const messageBubble = document.querySelector(`[data-message-id='${currentMessageId}']`);
 
+        console.log(currentMessageId);
+
         if (messageElement && messageBubble) {
             const isSender = messageBubble.classList.contains('message-sent');
             const replyToName = isSender ? 'You' : document.getElementById('chat-header-name').innerText.split('] ')[1];
@@ -229,7 +234,7 @@ function setupChatFormSubmit() {
     const messageInput = document.getElementById('message');
     const attachmentInput = document.getElementById('attachment-input');
     const attachmentPreview = document.getElementById('attachment-preview');
-    let replyingToMessageId = null; // Variable to hold the replied message ID
+    let replyingToMessageId = null; 
 
     // Listen to reply action
     document.querySelector('#modal-option-reply').addEventListener('click', function () {
@@ -237,6 +242,7 @@ function setupChatFormSubmit() {
         modal.hide();
         const messageId = document.querySelector('.message-options-btn[data-id]').dataset.id; // Re-fetch the message id from a reliable source if needed
         const messageElement = document.querySelector(`[data-message-id='${messageId}'] .fw-normal`);
+
         if (messageElement) {
             replyingToMessageId = messageId;
             document.getElementById('reply-to-container').style.display = 'block';
