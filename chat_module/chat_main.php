@@ -415,3 +415,9 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
 
 </div>
 </div>
+
+<div id="message-options-popup" style="position: absolute; background: white; border: 1px solid #ccc; padding: 5px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: none; z-index: 1000;">
+    <a href="#" class="dropdown-item" id="message-option-reply">Reply</a>
+    <a href="#" class="dropdown-item" id="message-option-forward">Forward</a>
+    <a href="#" class="dropdown-item text-danger" id="message-option-delete">Delete</a>
+</div>

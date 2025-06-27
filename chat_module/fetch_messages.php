@@ -89,12 +89,7 @@ foreach ($messages as $msg) {
     echo "<div class='position-relative p-3 rounded-3 shadow-sm {$class} {$bubbleAlignment}' style='max-width: 75%; min-width: 150px;'>";
 
     echo "<div class='position-absolute top-0 end-0 mt-1 me-1 d-flex gap-1'>";
-    echo "<div class='dropdown'><button class='btn btn-sm btn-light border px-1 py-0' type='button' data-bs-toggle='dropdown'><i class='bi bi-three-dots-vertical'></i></button><ul class='dropdown-menu dropdown-menu-end'>";
-    if ($isSender) {
-        echo "<li><a class='dropdown-item text-danger message-delete-btn' href='#' data-id='{$msg['id']}'>Delete</a></li>";
-    }
-    echo "<li><a class='dropdown-item' href='#'>Reply</a></li><li><a class='dropdown-item' href='#'>Forward</a></li></ul></div>";
-
+    echo "<button class='btn btn-sm btn-light border px-1 py-0 message-options-btn' data-id='{$msg['id']}' data-is-sender='" . ($isSender ? '1' : '0') . "'><i class='bi bi-three-dots-vertical'></i></button>";
     if (!$isSender) { // Only show reaction button for received messages
         echo "<button class='btn btn-sm btn-outline-secondary px-1 py-0 reaction-popup-btn' data-id='{$msg['id']}' title='React'><i class='bi bi-emoji-smile'></i></button>";
     }

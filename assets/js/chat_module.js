@@ -126,11 +126,10 @@ function loadChatMessages(receiverId, scroll = false) {
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             }
 
-            // Re-initialize Bootstrap dropdowns and set up reaction and delete handlers
-            reinitializeMessageDropdowns();
+            setupMessageOptionsPopup();
             setupReactionPopup();
             attachMessageDeleteHandlers();
-            attachAttachmentViewers(); // Attach click handlers for attachments
+            attachAttachmentViewers(); 
 
         })
         .catch(error => {
@@ -138,19 +137,78 @@ function loadChatMessages(receiverId, scroll = false) {
         });
 }
 
-// Function to re-initialize Bootstrap dropdowns
-function reinitializeMessageDropdowns() {
-    const dropdownToggles = document.querySelectorAll('#messages [data-bs-toggle="dropdown"]');
-    dropdownToggles.forEach(toggle => {
-        if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
-            // Check if a dropdown instance already exists
-            const existingDropdown = bootstrap.Dropdown.getInstance(toggle);
-            if (!existingDropdown) {
-                // Only create a new dropdown if one doesn't exist
-                new bootstrap.Dropdown(toggle);
+function setupMessageOptionsPopup() {
+    const popup = document.getElementById('message-options-popup');
+    if (!popup) return;
+
+    let currentMessageId = null;
+
+    const messagesContainer = document.getElementById('messages');
+    messagesContainer.addEventListener('click', function(event) {
+        const button = event.target.closest('.message-options-btn');
+        if (!button) return;
+
+        event.stopPropagation();
+        currentMessageId = button.dataset.id;
+        const isSender = button.dataset.isSender === '1';
+
+        const deleteOption = popup.querySelector('#message-option-delete');
+        if (deleteOption) {
+            deleteOption.style.display = isSender ? 'block' : 'none';
+        }
+
+        const rect = button.getBoundingClientRect();
+        popup.style.top = (window.scrollY + rect.top - popup.offsetHeight - 5) + 'px';
+        popup.style.left = (window.scrollX + rect.left) + 'px';
+        popup.style.display = 'block';
+    });
+
+    popup.querySelector('#message-option-delete').addEventListener('click', function(e) {
+        e.preventDefault();
+        popup.style.display = 'none';
+        if (currentMessageId) {
+            if (confirm('Are you sure you want to delete this message?')) {
+                const receiverId = document.getElementById('receiver').value;
+                const formData = new URLSearchParams();
+                formData.append('id', currentMessageId);
+
+                fetch('chat_module/delete_message.php', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                .then(response => response.text())
+                .then(result => {
+                        if (result.includes('Message deleted successfully.')) {
+                        loadChatMessages(receiverId, false);
+                    } else {
+                        alert('Error: ' + result);
+                    }
+                })
+                .catch(error => {
+                    console.error('Delete message error:', error);
+                });
             }
-        } else {
-            console.warn("Bootstrap Dropdown JS not found. Ensure Bootstrap's JavaScript is loaded.");
+        }
+    });
+
+        popup.querySelector('#message-option-reply').addEventListener('click', function(e) {
+        e.preventDefault();
+        alert(`Replying to message: ${currentMessageId}`);
+        popup.style.display = 'none';
+    });
+
+    popup.querySelector('#message-option-forward').addEventListener('click', function(e) {
+        e.preventDefault();
+        alert(`Forwarding message: ${currentMessageId}`);
+        popup.style.display = 'none';
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!popup.contains(e.target) && !e.target.closest('.message-options-btn')) {
+            popup.style.display = 'none';
         }
     });
 }
@@ -158,10 +216,9 @@ function reinitializeMessageDropdowns() {
 function setupChatFormSubmit() {
     const chatForm = document.getElementById('chat-form');
     const messageInput = document.getElementById('message');
-    const attachmentInput = document.getElementById('attachment-input'); // Get attachment input
-    const attachmentPreview = document.getElementById('attachment-preview'); // Get preview div
+    const attachmentInput = document.getElementById('attachment-input');
+    const attachmentPreview = document.getElementById('attachment-preview');
 
-    // Handle file selection and preview
     attachmentInput.addEventListener('change', function () {
         if (this.files.length > 0) {
             selectedAttachmentFile = this.files[0];
@@ -203,7 +260,6 @@ function setupChatFormSubmit() {
     });
 
 
-    // Event listener for sending message on form submit (e.g., clicking send button)
     chatForm.addEventListener('submit', function (e) {
         e.preventDefault();
 
@@ -211,7 +267,6 @@ function setupChatFormSubmit() {
         const receiverId = document.getElementById('receiver').value;
         const message = messageInput.value.trim();
 
-        // Allow sending if either message text or an attachment exists
         if (message === '' && !selectedAttachmentFile) {
             alert("Please enter a message or attach a file.");
             return;
@@ -221,25 +276,24 @@ function setupChatFormSubmit() {
             return;
         }
 
-        // Use FormData for file uploads
         const formData = new FormData();
         formData.append('receiver_id', receiverId);
         formData.append('message', message);
         if (selectedAttachmentFile) {
-            formData.append('attachment', selectedAttachmentFile); // Append the file
+            formData.append('attachment', selectedAttachmentFile);
         }
 
         fetch('chat_module/send_message.php', {
             method: 'POST',
-            body: formData, // FormData handles Content-Type automatically for file uploads
+            body: formData,
         })
             .then(response => response.text())
             .then(result => {
                 if (result.trim() === 'Message sent') {
-                    messageInput.value = ''; // Clear message input
-                    selectedAttachmentFile = null; // Clear selected file after sending
-                    attachmentInput.value = ''; // Clear file input
-                    attachmentPreview.innerHTML = ''; // Clear preview
+                    messageInput.value = '';
+                    selectedAttachmentFile = null;
+                    attachmentInput.value = '';
+                    attachmentPreview.innerHTML = '';
 
                     lastMessageId = 0;
                     loadChatMessages(receiverId, true);
@@ -253,13 +307,10 @@ function setupChatFormSubmit() {
             });
     });
 
-    // Add keydown event listener to the textarea for Shift+Enter vs. Enter
     messageInput.addEventListener('keydown', function (event) {
         if (event.key === 'Enter') {
             if (event.shiftKey) {
-                // Shift + Enter: new line (default textarea behavior)
             } else {
-                // Enter only: send message
                 event.preventDefault();
                 chatForm.dispatchEvent(new Event('submit'));
             }
@@ -267,7 +318,6 @@ function setupChatFormSubmit() {
     });
 }
 
-// New function to attach delete message handlers
 function attachMessageDeleteHandlers() {
     document.querySelectorAll('.message-delete-btn').forEach(button => {
         button.addEventListener('click', function (e) {
@@ -310,7 +360,6 @@ function attachMessageDeleteHandlers() {
     });
 }
 
-// Attachment Viewer Functions
 function attachAttachmentViewers() {
     const viewerModal = document.getElementById('attachment-viewer-modal');
     if (!viewerModal) return;
@@ -320,17 +369,15 @@ function attachAttachmentViewers() {
     const viewerFilename = document.getElementById('viewer-filename');
     const closeBtn = viewerModal.querySelector('.attachment-viewer-close');
 
-    // Close modal when close button is clicked
     closeBtn.onclick = function () {
         viewerModal.style.display = "none";
-        viewerImage.src = ''; // Clear image
-        viewerImage.style.display = 'none'; // Hide image
-        viewerPdf.src = ''; // Clear PDF
-        viewerPdf.style.display = 'none'; // Hide PDF
-        viewerFilename.textContent = ''; // Clear filename
+        viewerImage.src = '';
+        viewerImage.style.display = 'none';
+        viewerPdf.src = '';
+        viewerPdf.style.display = 'none';
+        viewerFilename.textContent = '';
     };
 
-    // Close modal when clicking outside of the content
     viewerModal.addEventListener('click', function (event) {
         if (event.target === viewerModal) {
             closeBtn.click();
@@ -339,7 +386,7 @@ function attachAttachmentViewers() {
 
     document.querySelectorAll('.message-attachment').forEach(attachmentDiv => {
         attachmentDiv.addEventListener('click', function (event) {
-            event.preventDefault(); // Prevent default link behavior
+            event.preventDefault(); 
             const src = this.getAttribute('data-src');
             const type = this.getAttribute('data-type');
             const filename = this.getAttribute('data-filename');
@@ -351,15 +398,14 @@ function attachAttachmentViewers() {
             if (type.startsWith('image/')) {
                 viewerImage.src = src;
                 viewerImage.style.display = 'block';
-                viewerPdf.style.display = 'none'; // Hide PDF viewer
+                viewerPdf.style.display = 'none';
                 viewerModal.style.display = "block";
             } else if (type === 'application/pdf') {
                 viewerPdf.src = src;
                 viewerPdf.style.display = 'block';
-                viewerImage.style.display = 'none'; // Hide image viewer
+                viewerImage.style.display = 'none';
                 viewerModal.style.display = "block";
             } else {
-                // For other file types, you might want to just open the link in a new tab
                 window.open(src, '_blank');
             }
         });
@@ -444,7 +490,6 @@ function setupReactionPopup() {
             currentMessageId = btn.getAttribute('data-id');
 
             const rect = btn.getBoundingClientRect();
-            // Position the popup above and to the right of the button
             popup.style.top = (window.scrollY + rect.top - popup.offsetHeight - 5) + 'px';
             popup.style.left = (window.scrollX + rect.left) + 'px';
             popup.style.display = 'block';
@@ -489,7 +534,7 @@ function setupReactionPopup() {
     });
 
     document.addEventListener('click', (e) => {
-        if (!popup.contains(e.target) && !e.target.classList.contains('reaction-popup-btn')) {
+        if (!popup.contains(e.target) && !e.target.closest('.reaction-popup-btn')) {
             popup.style.display = 'none';
             currentMessageId = null;
         }
