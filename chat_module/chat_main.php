@@ -485,6 +485,8 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
             <form id="chat-form">
                 <input type="hidden" id="sender" value="<?php echo htmlspecialchars($user_id); ?>">
                 <input type="hidden" id="receiver">
+                <input type="hidden" id="group_id">
+
                 <div class="d-flex flex-column w-100">
                     <div id="reply-to-container" class="p-2" style="display: none; background-color: #e9ecef; border-radius: 8px 8px 0 0; border: 1px solid #ddd; border-bottom: none;">
                         <div class="d-flex justify-content-between align-items-center">
