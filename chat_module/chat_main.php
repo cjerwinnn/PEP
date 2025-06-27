@@ -365,7 +365,7 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
             </div>
         </div>
     </div>
-</div>
+    </div>
 
 
 <div id="attachment-viewer-modal" class="modal-viewer">

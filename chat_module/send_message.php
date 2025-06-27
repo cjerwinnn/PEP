@@ -59,9 +59,9 @@ if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] == UPLOAD_ERR
 }
 
 // If no message text and no attachment, prevent sending an empty message
-if (empty($message) && empty($attachment_path)) {
+if (empty($message) && empty($attachment_path) && empty($reply_to_message_id)) {
     http_response_code(400);
-    echo 'Message text or attachment is required.';
+    echo 'A message, attachment, or reply is required.';
     exit;
 }
 

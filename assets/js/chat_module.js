@@ -304,15 +304,15 @@ function setupChatFormSubmit() {
     });
 
 
-     chatForm.addEventListener('submit', function (e) {
+    chatForm.addEventListener('submit', function (e) {
         e.preventDefault();
 
         const senderId = document.getElementById('sender').value;
         const receiverId = document.getElementById('receiver').value;
         const message = messageInput.value.trim();
 
-        if (message === '' && !selectedAttachmentFile) {
-            alert("Please enter a message or attach a file.");
+        if (message === '' && !selectedAttachmentFile && !replyingToMessageId) {
+            alert("Please enter a message, attach a file, or reply to a message.");
             return;
         }
         if (!receiverId) {
@@ -323,11 +323,14 @@ function setupChatFormSubmit() {
         const formData = new FormData();
         formData.append('receiver_id', receiverId);
         formData.append('message', message);
-        if (selectedAttachmentFile) {
-            formData.append('attachment', selectedAttachmentFile);
-        }
+
         if (replyingToMessageId) {
             formData.append('reply_to_message_id', replyingToMessageId);
+        }
+
+        // Also include the attachment if one is selected
+        if (selectedAttachmentFile) {
+            formData.append('attachment', selectedAttachmentFile, selectedAttachmentFile.name);
         }
 
         fetch('chat_module/send_message.php', {
