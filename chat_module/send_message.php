@@ -17,7 +17,7 @@ if (!$sender_id || !$receiver_id) {
 }
 
 
-// Check for file upload
+// Check for file upload1
 if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] == UPLOAD_ERR_OK) {
     $file_tmp_name = $_FILES['attachment']['tmp_name'];
     $file_name = $_FILES['attachment']['name'];
