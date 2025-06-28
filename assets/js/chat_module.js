@@ -625,6 +625,10 @@ function updateUserStatuses() {
 
 function openCreateGroupModal() {
     const groupNameInput = $('#create_group_name');
+    const searchInput = $('#employee-search-input');
+    const searchResults = $('#search-results-list');
+    const selectedMembersList = $('#selected-members-list');
+    let selectedMembers = {};
 
     // --- Validation ---
     if (groupNameInput.length === 0) {
@@ -632,23 +636,64 @@ function openCreateGroupModal() {
         return;
     }
 
+    // --- Employee Search ---
+    searchInput.on('keyup', function () {
+        const query = $(this).val();
+        if (query.length > 2) { // Start searching after 2 characters
+            $.ajax({
+                url: 'chat_module/fetch_employees.php',
+                type: 'GET',
+                data: {
+                    search: query
+                },
+                success: function (data) {
+                    searchResults.html(data).show();
+                }
+            });
+        } else {
+            searchResults.hide();
+        }
+    });
+
+    // --- Add Member to Selection ---
+    $(document).on('click', '#search-results-list .employee-item', function () {
+        const memberId = $(this).data('id');
+        const memberName = $(this).data('name');
+        const memberPic = $(this).data('pic');
+
+        if (!selectedMembers[memberId]) {
+            selectedMembers[memberId] = {
+                name: memberName,
+                pic: memberPic
+            };
+            const memberElement = `
+                <li class="list-group-item d-flex justify-content-between align-items-center" data-id="${memberId}">
+                    <div>
+                        <img src="${memberPic}" class="profile-pic me-2" alt="Profile">
+                        ${memberName}
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger remove-member-btn" data-id="${memberId}">&times;</button>
+                </li>`;
+            selectedMembersList.append(memberElement);
+        }
+        searchInput.val('');
+        searchResults.hide();
+    });
+
+    // --- Remove Member from Selection ---
+    $(document).on('click', '.remove-member-btn', function () {
+        const memberId = $(this).data('id');
+        delete selectedMembers[memberId];
+        $(this).closest('.list-group-item').remove();
+    });
+
     const groupName = groupNameInput.val().trim();
     if (groupName === '') {
         Swal.fire('Validation Error', 'Please enter a group name.', 'error');
         return;
     }
 
-    const members = [];
-    // Correctly gather member IDs from the UI elements
-    // This assumes each selected member has a class '.selected-member-item'
-    // and a 'data-id' attribute with the employee ID.
-    $('#selected-members-list .list-group-item').each(function () {
-        const memberId = $(this).data('id');
-        if (memberId) {
-            members.push(memberId);
-        }
-    });
-
+    const members = Object.keys(selectedMembers);
     if (members.length === 0) {
         Swal.fire('Validation Error', 'Please add at least one member to the group.', 'error');
         return;
@@ -657,7 +702,7 @@ function openCreateGroupModal() {
     const createBtn = $(this);
     createBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...');
 
-    // --- AJAX Request ---
+    // --- AJAX Request to Create Group ---
     $.ajax({
         url: 'chat_module/create_group.php',
         type: 'POST',
@@ -670,13 +715,11 @@ function openCreateGroupModal() {
             if (response.status === 'success') {
                 Swal.fire('Success!', response.message, 'success');
 
-                // Close the modal
+                // Close the modal and reset fields
                 $('#createGroupModal').modal('hide');
-
-                // Clear the form fields
-                $('#create_group_name').val('');
-                $('#selected-members-list').empty();
-                $('#employee-search-input').val('');
+                groupNameInput.val('');
+                selectedMembersList.empty();
+                searchInput.val('');
 
                 // Refresh the group list
                 fetchGroups();
@@ -684,7 +727,7 @@ function openCreateGroupModal() {
                 Swal.fire('Error', response.message || 'Could not create group.', 'error');
             }
         },
-        error: function (xhr, status, error) {
+        error: function (xhr) {
             console.error("AJAX Error:", xhr.responseText);
             Swal.fire('Error', 'An unexpected server error occurred. Please try again.', 'error');
         },
@@ -743,6 +786,112 @@ if (createGroupForm) {
             });
     });
 }
+
+$(document).ready(function () {
+    let selectedMembers = {};
+
+    // Handle employee search
+    $('#employee-search-input').on('keyup', function () {
+        const query = $(this).val();
+        if (query.length > 2) {
+            $.ajax({
+                url: 'chat_module/fetch_employees.php',
+                type: 'GET',
+                data: {
+                    search: query
+                },
+                success: function (data) {
+                    $('#search-results-list').html(data).show();
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", error);
+                    $('#search-results-list').html('<div class="list-group-item">Error fetching employees.</div>').show();
+                }
+            });
+        } else {
+            $('#search-results-list').hide();
+        }
+    });
+
+    // Handle adding a member
+    $(document).on('click', '#search-results-list .employee-item', function () {
+        const memberId = $(this).data('id');
+        const memberName = $(this).data('name');
+        const memberPic = $(this).data('pic');
+
+        if (!selectedMembers[memberId]) {
+            selectedMembers[memberId] = {
+                name: memberName,
+                pic: memberPic
+            };
+            const memberElement = `
+                <li class="list-group-item d-flex justify-content-between align-items-center" data-id="${memberId}">
+                    <div>
+                        <img src="${memberPic}" class="profile-pic me-2" alt="Profile">
+                        ${memberName}
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger remove-member-btn" data-id="${memberId}">&times;</button>
+                </li>`;
+            $('#selected-members-list').append(memberElement);
+        }
+        $('#employee-search-input').val('');
+        $('#search-results-list').hide();
+    });
+
+    // Handle removing a member
+    $(document).on('click', '.remove-member-btn', function () {
+        const memberId = $(this).data('id');
+        delete selectedMembers[memberId];
+        $(this).closest('.list-group-item').remove();
+    });
+
+    // Handle group creation
+    $('#submit-new-group-btn').on('click', function () {
+        const groupName = $('#create_group_name').val().trim();
+        const members = Object.keys(selectedMembers);
+
+        if (groupName === '') {
+            Swal.fire('Validation Error', 'Please enter a group name.', 'error');
+            return;
+        }
+
+        if (members.length === 0) {
+            Swal.fire('Validation Error', 'Please add at least one member to the group.', 'error');
+            return;
+        }
+
+        $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...');
+
+        $.ajax({
+            url: 'chat_module/create_group.php',
+            type: 'POST',
+            data: {
+                group_name: groupName,
+                group_members: members
+            },
+            dataType: 'json',
+            success: function (response) {
+                if (response.status === 'success') {
+                    Swal.fire('Success!', response.message, 'success');
+                    $('#createGroupModal').modal('hide');
+                    $('#create_group_name').val('');
+                    $('#selected-members-list').empty();
+                    selectedMembers = {};
+                    fetchGroups();
+                } else {
+                    Swal.fire('Error', response.message || 'Could not create group.', 'error');
+                }
+            },
+            error: function (xhr) {
+                console.error("AJAX Error:", xhr.responseText);
+                Swal.fire('Error', 'An unexpected server error occurred.', 'error');
+            },
+            complete: function () {
+                $('#submit-new-group-btn').prop('disabled', false).text('Create Group');
+            }
+        });
+    });
+});
 
 function fetchGroups() {
     $.ajax({
