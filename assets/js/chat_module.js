@@ -624,60 +624,69 @@ function updateUserStatuses() {
 }
 
 function openCreateGroupModal() {
-    const modalElement = document.getElementById('createGroupModal');
-    if (!modalElement) {
-        alert("Developer Error: The modal with ID 'createGroupModal' was not found in the HTML.");
+    const groupName = $('#create_group_name').val().trim();
+    const members = [];
+
+    // Correctly gather member IDs from the UI elements
+    // This assumes each selected member has a class '.selected-member-item'
+    // and a 'data-id' attribute with the employee ID.
+    $('#selected-members-list .list-group-item').each(function () {
+        const memberId = $(this).data('id');
+        if (memberId) {
+            members.push(memberId);
+        }
+    });
+
+    // --- Validation ---
+    if (groupName === '') {
+        Swal.fire('Validation Error', 'Please enter a group name.', 'error');
         return;
     }
-    const createGroupModal = new bootstrap.Modal(modalElement);
-    const userListContainer = document.getElementById('group-members-list');
 
-    fetch('chat_module/fetch_employees.php')
-        .then(response => {
-            if (!response.ok) throw new Error('Network error while fetching employees.');
-            return response.text();
-        })
-        .then(html => {
-            userListContainer.innerHTML = ''; // Clear previous list
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
+    if (members.length === 0) {
+        Swal.fire('Validation Error', 'Please add at least one member to the group.', 'error');
+        return;
+    }
 
-            const employeeItems = tempDiv.querySelectorAll('.employee-item');
-            if (employeeItems.length === 0) {
-                userListContainer.innerHTML = '<p class="text-muted text-center">No users available to add.</p>';
-                return;
+    const createBtn = $(this);
+    createBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...');
+
+    // --- AJAX Request ---
+    $.ajax({
+        url: 'chat_module/create_group.php',
+        type: 'POST',
+        data: {
+            group_name: groupName,
+            group_members: members // Pass the array of member IDs
+        },
+        dataType: 'json',
+        success: function (response) {
+            if (response.status === 'success') {
+                Swal.fire('Success!', response.message, 'success');
+
+                // Close the modal
+                $('#createGroupModal').modal('hide');
+
+                // Clear the form fields
+                $('#create_group_name').val('');
+                $('#selected-members-list').empty();
+                $('#employee-search-input').val('');
+
+                // Refresh the group list (assuming you have a function for this)
+                fetchGroups();
+            } else {
+                Swal.fire('Error', response.message || 'Could not create group.', 'error');
             }
-
-            employeeItems.forEach(item => {
-                const employeeId = item.dataset.id;
-                if (!employeeId) return; // Skip if no ID
-
-                const formCheckDiv = document.createElement('div');
-                formCheckDiv.className = 'form-check p-2 border-bottom';
-
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.className = 'form-check-input me-2';
-                checkbox.value = employeeId;
-                checkbox.id = `user-check-${employeeId}`;
-
-                const label = document.createElement('label');
-                label.className = 'form-check-label w-100';
-                label.htmlFor = `user-check-${employeeId}`;
-                label.innerHTML = item.innerHTML; // Reuse the visual layout
-
-                formCheckDiv.appendChild(checkbox);
-                formCheckDiv.appendChild(label);
-                userListContainer.appendChild(formCheckDiv);
-            });
-        })
-        .catch(error => {
-            userListContainer.innerHTML = '<p class="text-danger">Could not load users.</p>';
-            console.error('Error fetching employees:', error);
-            alert('Failed to load employee list. Please check the console.');
-        });
-
-    createGroupModal.show();
+        },
+        error: function (xhr, status, error) {
+            console.error("AJAX Error:", xhr.responseText);
+            Swal.fire('Error', 'An unexpected server error occurred. Please try again.', 'error');
+        },
+        complete: function () {
+            // Re-enable the button
+            createBtn.prop('disabled', false).text('Create Group');
+        }
+    });
 }
 
 document.addEventListener('click', function (e) {
@@ -728,17 +737,16 @@ if (createGroupForm) {
     });
 }
 
-function fetchGroups() {
-    fetch('chat_module/fetch_groups.php')
-        .then(response => response.text())
-        .then(data => {
-            const groupList = document.getElementById('group-list');
-            if (groupList) {
-                groupList.innerHTML = data;
-                attachGroupClickHandlers();
+ function fetchGroups() {
+        $.ajax({
+            url: 'chat_module/fetch_groups.php',
+            type: 'GET',
+            success: function(data) {
+                // Assuming you have a container with this ID to display the list of groups
+                $('#group-list-container').html(data);
+            },
+            error: function() {
+                console.error('Failed to fetch groups.');
             }
-        })
-        .catch(error => console.error('Error fetching groups:', error));
-}
-
-
+        });
+    }
