@@ -418,29 +418,39 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
 
 <!-- Create Group Modal -->
 <div class="modal fade" id="createGroupModal" tabindex="-1" aria-labelledby="createGroupModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4">
+    <div class="modal-dialog">
+        <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="createGroupModalLabel">Create New Group</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <!-- Body of your createGroupModal -->
             <div class="modal-body">
-                <form id="create-group-form">
-                    <div class="mb-3">
-                        <label for="group-name-input" class="form-label">Group Name</label>
-                        <input type="text" class="form-control rounded-4" id="group-name-input" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Select Members</label>
-                        <div id="group-members-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #ced4da; padding: 10px; border-radius: .375rem;">
-                            <!-- Employee list will be dynamically loaded here -->
-                        </div>
-                    </div>
-                    <div class="text-end">
-                        <button type="button" class="btn btn-secondary rounded-4" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary rounded-4">Create Group</button>
-                    </div>
-                </form>
+                <!-- Group Name Input -->
+                <div class="mb-3">
+                    <label for="create_group_name" class="form-label">Group Name</label>
+                    <input type="text" class="form-control" id="create_group_name" placeholder="Enter group name...">
+                </div>
+
+                <!-- Employee Search Input -->
+                <div class="mb-3">
+                    <label for="employee-search-input" class="form-label">Add Members</label>
+                    <input type="text" class="form-control" id="employee-search-input" placeholder="Start typing to search for employees...">
+                    <!-- Search results will appear here -->
+                    <div class="list-group mt-1" id="search-results-list" style="display:none; position: absolute; z-index: 1056; width: 93%;"></div>
+                </div>
+
+                <!-- List of Selected Members -->
+                <h6 class="mt-4">Members to Add</h6>
+                <ul class="list-group" id="selected-members-list">
+                    <!-- Selected members will be dynamically added here -->
+                </ul>
+            </div>
+
+            <!-- Footer of your createGroupModal -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submit-new-group-btn">Create Group</button>
             </div>
         </div>
     </div>
@@ -459,7 +469,9 @@ $user_id = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
             </div>
 
             <div id="group-tab" class="tab-content p-2">
-                <button id="create-group-btn" class="btn btn-primary btn-sm mb-2">Create Group</button>
+                <button type="button" class="btn btn-primary btn-sm mb-2" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+                    Create Group
+                </button>
                 <div id="group-list">
                 </div>
             </div>

@@ -624,9 +624,21 @@ function updateUserStatuses() {
 }
 
 function openCreateGroupModal() {
-    const groupName = $('#create_group_name').val().trim();
-    const members = [];
+    const groupNameInput = $('#create_group_name');
 
+    // --- Validation ---
+    if (groupNameInput.length === 0) {
+        Swal.fire('Error', 'The group name input field could not be found. Please check the HTML of your modal.', 'error');
+        return;
+    }
+
+    const groupName = groupNameInput.val().trim();
+    if (groupName === '') {
+        Swal.fire('Validation Error', 'Please enter a group name.', 'error');
+        return;
+    }
+
+    const members = [];
     // Correctly gather member IDs from the UI elements
     // This assumes each selected member has a class '.selected-member-item'
     // and a 'data-id' attribute with the employee ID.
@@ -636,12 +648,6 @@ function openCreateGroupModal() {
             members.push(memberId);
         }
     });
-
-    // --- Validation ---
-    if (groupName === '') {
-        Swal.fire('Validation Error', 'Please enter a group name.', 'error');
-        return;
-    }
 
     if (members.length === 0) {
         Swal.fire('Validation Error', 'Please add at least one member to the group.', 'error');
@@ -672,7 +678,7 @@ function openCreateGroupModal() {
                 $('#selected-members-list').empty();
                 $('#employee-search-input').val('');
 
-                // Refresh the group list (assuming you have a function for this)
+                // Refresh the group list
                 fetchGroups();
             } else {
                 Swal.fire('Error', response.message || 'Could not create group.', 'error');
@@ -689,8 +695,9 @@ function openCreateGroupModal() {
     });
 }
 
+
 document.addEventListener('click', function (e) {
-    if (e.target && e.target.id === 'create-group-btn') {
+    if (e.target && e.target.id === 'submit-new-group-btn') {
         openCreateGroupModal();
     }
 });
@@ -737,16 +744,16 @@ if (createGroupForm) {
     });
 }
 
- function fetchGroups() {
-        $.ajax({
-            url: 'chat_module/fetch_groups.php',
-            type: 'GET',
-            success: function(data) {
-                // Assuming you have a container with this ID to display the list of groups
-                $('#group-list-container').html(data);
-            },
-            error: function() {
-                console.error('Failed to fetch groups.');
-            }
-        });
-    }
+function fetchGroups() {
+    $.ajax({
+        url: 'chat_module/fetch_groups.php',
+        type: 'GET',
+        success: function (data) {
+            // Assuming you have a container with this ID to display the list of groups
+            $('#group-list-container').html(data);
+        },
+        error: function () {
+            console.error('Failed to fetch groups.');
+        }
+    });
+}
