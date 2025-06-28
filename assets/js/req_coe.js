@@ -1098,6 +1098,7 @@ function COE_TravelPrint(buttonId) {
 }
 
 //VIEW LEAVE
+//VIEW LEAVE
 
 function COE_ViewLeave(buttonId) {
   const btn = document.getElementById(buttonId);
@@ -1123,19 +1124,20 @@ function COE_ViewLeave(buttonId) {
           } else {
             data.forEach(leave => {
               const row = document.createElement('tr');
+              // Updated this part to use an onclick event for the button
               row.innerHTML = `
-            <td>${leave.leaveid}</td>
-            <td class="text-center">${leave.leavedate}</td>
-            <td class="text-center">${leave.leavedurationselection}</td>
-            <td class="text-center">${leave.leavetype}</td>
-            <td class="text-start">${leave.reason}</td>
-            <td class="text-center">${leave.status}</td>
-            <td class="text-center">
-              <button class="btn btn-sm btn-outline-dark rounded-3 px-3" data-leave-id="${leave.leaveid}">
-                View
-              </button>
-            </td>
-          `;
+              <td>${leave.leaveid}</td>
+              <td class="text-center">${leave.leavedate}</td>
+              <td class="text-center">${leave.leavedurationselection}</td>
+              <td class="text-center">${leave.leavetype}</td>
+              <td class="text-start">${leave.reason}</td>
+              <td class="text-center">${leave.status}</td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-dark rounded-3 px-3" onclick="viewLeavePDF('${leave.leaveid}')">
+                  View
+                </button>
+              </td>
+            `;
               tbody.appendChild(row);
             });
           }
@@ -1146,9 +1148,23 @@ function COE_ViewLeave(buttonId) {
         .catch(error => {
           console.error('Error fetching leave data:', error);
         });
-    }
-    )
+    });
   }
+}
+
+// New function to open the PDF in a new tab
+function viewLeavePDF(leaveId) {
+  const employeeId = document.getElementById('emp_id').value.trim();
+  const startDate = document.getElementById('dateFrom').value;
+  const endDate = document.getElementById('dateTo').value;
+
+  if (!employeeId || !startDate || !endDate) {
+    showAlert('Employee ID and travel dates must be provided to view leave details.');
+    return;
+  }
+
+  const url = `print/view_leave_details.php?employee_id=${encodeURIComponent(employeeId)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
+  window.open(url, '_blank');
 }
 
 
