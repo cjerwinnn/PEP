@@ -42,7 +42,6 @@ header("Pragma: no-cache");
               <input type="password" class="form-control rounded-4" id="password" name="password" value="1234ABCD" required />
             </div>
 
-
             <?php if (isset($_GET['error'])): ?>
               <div class="alert alert-danger small rounded-4">
                 <?php
@@ -52,7 +51,6 @@ header("Pragma: no-cache");
                 ?>
               </div>
             <?php endif; ?>
-
 
             <button type="submit" class="btn btn-primary w-100 rounded-4">Login</button>
           </form>
