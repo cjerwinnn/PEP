@@ -20,6 +20,12 @@
                         <span class="fw-semibold text-dark">C.O.E</span>
                     </button>
 
+
+                    <button onclick="loadPage('dashboard/bulletin_board.php')" class="btn btn-light shadow rounded-4 px-4 py-3 text-start" style="width: 180px; height: 120px;">
+                        <i class="bi bi-journal-text fs-2 text-primary"></i><br>
+                        <span class="fw-semibold text-dark">Bulletin Board</span>
+                    </button>
+
                 </div>
             </div>
         </div>

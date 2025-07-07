@@ -23,7 +23,7 @@ toggle.onclick = function () {
 
 // Initial load of dashboard.php into main-content
 document.addEventListener('DOMContentLoaded', () => {
-  fetch('dashboard_wtms.php')
+  fetch('dashboard_submenu.php')
     .then(response => response.text())
     .then(data => {
       document.getElementById('main-content').innerHTML = data;

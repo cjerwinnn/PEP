@@ -88,6 +88,7 @@ $img_src = isValidBase64Image($picture)
                 </div>
 
                 <div class="dropdown">
+
                     <button class="btn dropdown-toggle border-0 bg-transparent p-0"
                         type="button"
                         id="profileDropdown"
@@ -124,7 +125,7 @@ $img_src = isValidBase64Image($picture)
 
                         <!-- Account Settings -->
                         <li>
-                            <a class="dropdown-item py-2 px-3 rounded-3 d-flex align-items-center gap-2 hover-bg" href="account-settings.php">
+                            <a class="dropdown-item py-2 px-3 rounded-3 d-flex align-items-center gap-2 hover-bg" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#setVaultPasswordModal">
                                 <i class="bi bi-gear-fill text-primary"></i>
                                 <span class="fw-medium">Account Settings</span>
                             </a>
@@ -153,6 +154,42 @@ $img_src = isValidBase64Image($picture)
 
     <div id="alert-placeholder" style="position: fixed; top: 10px; right: 10px; z-index: 1056;"></div>
     <div id="alert-success-placeholder" style="position: fixed; top: 10px; right: 10px; z-index: 1056;"></div>
+
+    <div class="modal fade" id="setVaultPasswordModal" tabindex="-1" aria-labelledby="setVaultPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="setVaultPasswordModalLabel">Set Vault Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="setVaultPasswordForm">
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" required>
+                            <div id="password-strength-meter" class="password-strength-meter"></div>
+                            <div id="password-strength-text" class="form-text"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" required>
+                            <div id="password-match-text" class="form-text"></div>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="showPassword">
+                            <label class="form-check-label" for="showPassword">
+                                Show Password
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="savePasswordBtn">Save Password</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <!-- =========== Scripts =========  -->

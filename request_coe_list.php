@@ -119,18 +119,18 @@ $employeeid = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
 
                 <div class="row g-4">
 
-                    <!-- Benefit Claim -->
+                    <!-- Financial -->
                     <div class="col-md-6">
                         <div class="p-3 border rounded-4 h-100 shadow-sm">
                             <button type="button"
                                 class="btn btn-outline-secondary btn-lg w-100 rounded-pill"
                                 data-bs-toggle="modal"
                                 data-bs-dismiss="modal"
-                                onclick="COE_BenefitClaimRequest('<?= $employeeid ?>')">
-                                Benefit Claim
+                                onclick="COE_FinancialRequest('<?= $employeeid ?>')">
+                                Financial
                             </button>
                             <div class="small text-muted mt-2 text-center">
-                                For government, private, or health-related benefit claims (e.g., SSS, PhilHealth, Pag-ibig, Insurance).
+                                For loans, credit card applications, bank requirements, and other financial-related endorsements.
                             </div>
                         </div>
                     </div>
@@ -151,22 +151,6 @@ $employeeid = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
                         </div>
                     </div>
 
-                    <!-- Financial -->
-                    <div class="col-md-6">
-                        <div class="p-3 border rounded-4 h-100 shadow-sm">
-                            <button type="button"
-                                class="btn btn-outline-secondary btn-lg w-100 rounded-pill"
-                                data-bs-toggle="modal"
-                                data-bs-dismiss="modal"
-                                onclick="COE_FinancialRequest('<?= $employeeid ?>')">
-                                Financial
-                            </button>
-                            <div class="small text-muted mt-2 text-center">
-                                For loans, credit card applications, bank requirements, and other financial-related endorsements.
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Training / Educational -->
                     <div class="col-md-6">
                         <div class="p-3 border rounded-4 h-100 shadow-sm">
@@ -179,6 +163,22 @@ $employeeid = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
                             </button>
                             <div class="small text-muted mt-2 text-center">
                                 For school enrollment, scholarship, or training-related documentation requirements.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Benefit Claim -->
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-4 h-100 shadow-sm">
+                            <button type="button"
+                                class="btn btn-outline-secondary btn-lg w-100 rounded-pill"
+                                data-bs-toggle="modal"
+                                data-bs-dismiss="modal"
+                                onclick="COE_BenefitClaimRequest('<?= $employeeid ?>')">
+                                Benefit Claim
+                            </button>
+                            <div class="small text-muted mt-2 text-center">
+                                For government, private, or health-related benefit claims (e.g., SSS, PhilHealth, Pag-ibig, Insurance).
                             </div>
                         </div>
                     </div>

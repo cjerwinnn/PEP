@@ -787,8 +787,26 @@ if (createGroupForm) {
     });
 }
 
+
 $(document).ready(function () {
     let selectedMembers = {};
+
+    // Show all employees when modal opens
+    $('#createGroupModal').on('shown.bs.modal', function () {
+        // Fetch all employees (no search term)
+        $.ajax({
+            url: 'chat_module/fetch_employees.php',
+            type: 'GET',
+            data: { search: '' },
+            success: function (data) {
+                $('#search-results-list').html(data).show();
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", error);
+                $('#search-results-list').html('<div class="list-group-item">Error fetching employees.</div>').show();
+            }
+        });
+    });
 
     // Handle employee search
     $('#employee-search-input').on('keyup', function () {
@@ -809,7 +827,23 @@ $(document).ready(function () {
                 }
             });
         } else {
-            $('#search-results-list').hide();
+            // Show all employees if input is cleared
+            if (query.length === 0) {
+                $.ajax({
+                    url: 'chat_module/fetch_employees.php',
+                    type: 'GET',
+                    data: { search: '' },
+                    success: function (data) {
+                        $('#search-results-list').html(data).show();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error:", error);
+                        $('#search-results-list').html('<div class="list-group-item">Error fetching employees.</div>').show();
+                    }
+                });
+            } else {
+                $('#search-results-list').hide();
+            }
         }
     });
 

@@ -35,11 +35,11 @@ header("Pragma: no-cache");
           <form action="functions/whp_login.php" method="POST" novalidate>
             <div class="mb-3 text-start">
               <label for="username" class="form-label small">Username</label>
-              <input type="text" class="form-control rounded-4" id="username" name="username" value="PDMC000325" required />
+              <input type="text" class="form-control rounded-4" id="username" name="username" value="" required />
             </div>
             <div class="mb-3 text-start">
               <label for="password" class="form-label small">Password</label>
-              <input type="password" class="form-control rounded-4" id="password" name="password" value="1234ABCD" required />
+              <input type="password" class="form-control rounded-4" id="password" name="password" value="" required />
             </div>
 
             <?php if (isset($_GET['error'])): ?>
