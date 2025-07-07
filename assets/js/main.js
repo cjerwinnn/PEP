@@ -246,3 +246,11 @@ function Load_ChatDesk() {
       console.error('Fetch error:', error);
     });
 }
+
+
+document.querySelectorAll('.view-memo-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    const pdfPath = this.getAttribute('data-pdf');
+    document.getElementById('memoFrame').src = pdfPath;
+  });
+});
