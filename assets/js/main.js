@@ -248,9 +248,23 @@ function Load_ChatDesk() {
 }
 
 
-document.querySelectorAll('.view-memo-btn').forEach(btn => {
-  btn.addEventListener('click', function () {
-    const pdfPath = this.getAttribute('data-pdf');
-    document.getElementById('memoFrame').src = pdfPath;
-  });
-});
+function setupMemoModalViewer(memoModalId = 'memoModal', memoFrameId = 'memoFrame', btnClass = 'view-memo-btn') {
+    const memoModal = document.getElementById(memoModalId);
+    const memoFrame = document.getElementById(memoFrameId);
+    document.body.addEventListener('click', function (e) {
+        const btn = e.target.closest('.' + btnClass);
+        if (btn) {
+            const pdf = btn.getAttribute('data-pdf');
+            if (pdf && memoFrame) {
+                memoFrame.src = pdf;
+            }
+        }
+    });
+    if (memoModal) {
+        memoModal.addEventListener('hidden.bs.modal', function () {
+            if (memoFrame) memoFrame.src = '';
+        });
+    }
+}
+
+setupMemoModalViewer()

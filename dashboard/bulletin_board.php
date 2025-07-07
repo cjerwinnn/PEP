@@ -139,7 +139,7 @@
                     <li class="list-group-item">
                         <p class="mb-1"><strong>Subject:</strong> Process Time of Employee Documents Request</p>
                         <p class="mb-1 text-muted"><small>Posted by: HR Department</small></p>
-                        <button class="btn btn-sm btn-outline-secondary view-memo-btn" data-bs-toggle="modal" data-bs-target="#memoModal" data-pdf="uploads/Memos/HR MEMO NO.222.pdf">View Memo (PDF)</button>
+                        <button class="btn btn-sm btn-outline-secondary view-memo-btn" data-bs-toggle="modal" data-bs-target="#memoModal" data-pdf="../uploads/Memos/HR MEMO NO.222.pdf">View Memo (PDF)</button>
                     </li>
                     <li class="list-group-item">
                         <p class="mb-1"><strong>Subject:</strong> New Dress Code Policy</p>
@@ -204,11 +204,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Load selected PDF into modal iframe
-
-    </script>
 
 </body>
 
