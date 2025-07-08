@@ -33,6 +33,7 @@ $img_src = isValidBase64Image($picture)
     <!-- ======= Styles ====== -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="icon" href="assets/imgs/pdmc_logo_white.png" type="image/png" />
 </head>
@@ -53,6 +54,12 @@ $img_src = isValidBase64Image($picture)
                     </a>
                 </li>
 
+                <li>
+                    <a href="#" class="nav-link" data-page="dashboard/community_wall.php">
+                        <span class="ms-1 icon me-4"><ion-icon name="megaphone-outline"></ion-icon></span>
+                        <span class="title">Community Wall</span>
+                    </a>
+                </li>
 
                 <li>
                     <a href="#" class="nav-link" data-page="dashboard_submenu.php">
@@ -155,6 +162,41 @@ $img_src = isValidBase64Image($picture)
     <div id="alert-placeholder" style="position: fixed; top: 10px; right: 10px; z-index: 1056;"></div>
     <div id="alert-success-placeholder" style="position: fixed; top: 10px; right: 10px; z-index: 1056;"></div>
 
+    <?php if (!isset($_SESSION['privacy_acknowledged'])): ?>
+        <script>
+            window.addEventListener('load', function() {
+                var modal = new bootstrap.Modal(document.getElementById('dataPrivacyModal'));
+                modal.show();
+            });
+        </script>
+    <?php endif; ?>
+
+
+    <!-- Data Privacy Notice Modal -->
+    <div class="modal fade" id="dataPrivacyModal" tabindex="-1"
+        aria-labelledby="dataPrivacyModalLabel" aria-hidden="true"
+        data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title" id="dataPrivacyModalLabel">🔒 Data Privacy Notice</h5>
+                </div>
+                <div class="modal-body">
+                    <p>PDMC values and upholds your right to data privacy. As part of our compliance with the Data Privacy Act of 2012, we ensure that all personal information you provide on this portal is collected, processed, and stored with utmost confidentiality and security.</p>
+                    <ul>
+                        <li>Your data will only be used for legitimate HR and administrative purposes.</li>
+                        <li>We will not disclose your personal information to third parties without your consent.</li>
+                        <li>You have the right to access, update, and request deletion of your data, subject to legal and contractual obligations.</li>
+                    </ul>
+                    <p>By using this employee portal, you acknowledge and agree to the data practices outlined above.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" data-bs-dismiss="modal">I Acknowledge</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="setVaultPasswordModal" tabindex="-1" aria-labelledby="setVaultPasswordModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -194,6 +236,7 @@ $img_src = isValidBase64Image($picture)
 
     <!-- =========== Scripts =========  -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="assets/js/req_coe_list.js"></script>

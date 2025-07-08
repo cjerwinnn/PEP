@@ -23,10 +23,7 @@ $emp_fullname = $_SESSION['firstname'] .
     (!empty($_SESSION['middlename']) ? ' ' . $_SESSION['middlename'] : '') .
     ' ' . $_SESSION['lastname'] .
     ($_SESSION['suffix'] !== 'NOT APPLICABLE' && !empty($_SESSION['suffix']) ? ' ' . $_SESSION['suffix'] : '');
-
-
 ?>
-
 
 <div class="container-fluid mb-2">
     <div class="card shadow rounded-4">
@@ -80,8 +77,21 @@ $emp_fullname = $_SESSION['firstname'] .
             </div>
 
             <div class="col-12 col-md-3 mb-2">
-                <label for="date_needed" class="form-label small">Date Needed<span class="text-danger"> *</span></label>
-                <input type="date" class="form-control rounded-4" id="date_needed">
+                <label for="date_needed" class="form-label small">
+                    Date Needed<span class="text-danger"> *</span>
+                </label>
+                <div class="position-relative">
+                    <input type="date" class="form-control rounded-4 pe-5" id="date_needed">
+                    <a id="date_notice_icon"
+                        href="uploads/Memos/HR_MEMO_NO_222.pdf"
+                        target="_blank"
+                        class="position-absolute top-50 end-0 translate-middle-y me-3"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="left"
+                        title="">
+                        <i class="bi bi-info-circle-fill text-primary" style="font-size: 1.5rem;"></i>
+                    </a>
+                </div>
             </div>
 
             <div class="col-12 col-md-3 mb-4">

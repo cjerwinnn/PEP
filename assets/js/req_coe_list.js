@@ -55,6 +55,27 @@ function COE_TravelRequest(employee_id) {
             const reqIdInput = document.getElementById('req_id');
             reqIdInput.value = employee_id + '_' + generateCOEId();
 
+
+            fetch('fetch/policy/coe_dateneeded.php')
+                .then(res => res.text())
+                .then(days => {
+                    const leadDays = parseInt(days) || 0;
+                    const dateInput = document.getElementById('date_needed');
+
+                    const today = new Date();
+                    today.setDate(today.getDate() + leadDays);
+                    const minDate = today.toISOString().split('T')[0];
+
+                    dateInput.min = minDate;
+                    dateInput.value = minDate;
+
+                    const tooltipIcon = document.getElementById('date_notice_icon');
+                    tooltipIcon.setAttribute('title', `Based Memo 222: COE for travel must be requested at least ${leadDays} day(s) in advance.`);
+
+                    // Re-initialize tooltip (Bootstrap)
+                    new bootstrap.Tooltip(tooltipIcon);
+                });
+
             //Modal Summary
             ShowSummary('submit_btn');
             //Submit Request
@@ -65,11 +86,11 @@ function COE_TravelRequest(employee_id) {
 
             // File Upload
             const fileInput = document.getElementById('files');
-            const browseBtn = document.getElementById('btnBrowseFiles'); // Your browse button id
+            const browseBtn = document.getElementById('btnBrowseFiles');
 
             if (fileInput && browseBtn) {
                 browseBtn.addEventListener('click', () => fileInput.click());
-                fileInput.addEventListener('change', handleFileSelect); // your file handler function
+                fileInput.addEventListener('change', handleFileSelect);
             }
 
         })

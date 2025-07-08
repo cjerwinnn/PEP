@@ -23,7 +23,7 @@ toggle.onclick = function () {
 
 // Initial load of dashboard.php into main-content
 document.addEventListener('DOMContentLoaded', () => {
-  fetch('dashboard_submenu.php')
+  fetch('dashboard/community_wall.php')
     .then(response => response.text())
     .then(data => {
       document.getElementById('main-content').innerHTML = data;
@@ -247,24 +247,3 @@ function Load_ChatDesk() {
     });
 }
 
-
-function setupMemoModalViewer(memoModalId = 'memoModal', memoFrameId = 'memoFrame', btnClass = 'view-memo-btn') {
-    const memoModal = document.getElementById(memoModalId);
-    const memoFrame = document.getElementById(memoFrameId);
-    document.body.addEventListener('click', function (e) {
-        const btn = e.target.closest('.' + btnClass);
-        if (btn) {
-            const pdf = btn.getAttribute('data-pdf');
-            if (pdf && memoFrame) {
-                memoFrame.src = pdf;
-            }
-        }
-    });
-    if (memoModal) {
-        memoModal.addEventListener('hidden.bs.modal', function () {
-            if (memoFrame) memoFrame.src = '';
-        });
-    }
-}
-
-setupMemoModalViewer()
