@@ -1,3 +1,12 @@
+function escapeHtml(text) {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 let currentPage = 1;
 let pageLimit = 10;
 
@@ -13,10 +22,10 @@ function paginateTable() {
 function applyFiltersAndPaginate() {
     const input = document.getElementById("ceSearchBar");
     const filter = input.value.toLowerCase();
-    const table = document.getElementById("ceTable");
+    const table = document.getElementById("maintenance_checklist_table");
     const tbody = table.querySelector("tbody");
     const rows = Array.from(tbody.querySelectorAll("tr"));
-    const pageLimitSelect = document.getElementById("ceTableLimit");
+    const pageLimitSelect = document.getElementById("maintenance_checklist_tableLimit");
     pageLimit = parseInt(pageLimitSelect.value);
 
     const filteredRows = rows.filter(row => {
@@ -75,3 +84,33 @@ function lastPage() {
     currentPage = totalPages;
     applyFiltersAndPaginate();
 }
+
+function maintenance_coechecklist_filter() {
+    const input = document.getElementById('ceSearchBar').value.toLowerCase();
+    const filter = document.getElementById('ceFilterDropdown').value.toLowerCase();
+    const table = document.getElementById('maintenance_checklist_table');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+    let visibleCount = 0;
+    const limit = parseInt(document.getElementById('maintenance_checklist_tableLimit').value);
+    const pageInfo = document.getElementById('cePageInfo');
+
+    for (let i = 0; i < rows.length; i++) {
+        const cols = rows[i].getElementsByTagName('td');
+        const rowText = rows[i].innerText.toLowerCase();
+        const coeType = cols[0].innerText.toLowerCase();
+
+        const matchesSearch = rowText.includes(input);
+        const matchesFilter = filter === "" || coeType.includes(filter);
+
+        if (matchesSearch && matchesFilter) {
+            rows[i].style.display = visibleCount < limit ? "" : "none";
+            visibleCount++;
+        } else {
+            rows[i].style.display = "none";
+        }
+    }
+
+    pageInfo.innerText = `Showing ${Math.min(visibleCount, limit)} of ${visibleCount} entries`;
+}
+

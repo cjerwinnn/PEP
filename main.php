@@ -82,9 +82,9 @@ $img_src = isValidBase64Image($picture)
                     </a>
                 </li>
 
-                <li>
+                <li class="mt-4">
                     <a href="#" class="nav-link" data-page="maintenance_submenu.php" onclick="loadPage('maintenance_submenu.php')">
-                        <span class="ms-1 icon me-4"><ion-icon name="document-text-outline"></ion-icon></span>
+                        <span class="ms-1 icon me-4"><ion-icon name="settings-outline"></ion-icon></span>
                         <span class="title">Maintenance</span>
                     </a>
                 </li>
@@ -250,6 +250,7 @@ $img_src = isValidBase64Image($picture)
     <script src="assets/js/req_coe.js"></script>
     <script src="assets/js/chat_module.js"></script>
     <script src="assets/js/functions.js"></script>
+    <script src="assets/js/maintenance.js"></script>
     <script src="assets/js/main.js"></script>
 
 

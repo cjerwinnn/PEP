@@ -10,7 +10,7 @@
             <!-- ======================= Tile Buttons ================== -->
             <div class="cardBox position-relative">
                 <div class="d-flex gap-3 flex-wrap">
-                    <button onclick="loadPage('request_coe_list.php')" class="btn btn-light shadow rounded-4 px-4 py-3 text-start" style="width: 180px; height: 120px;">
+                    <button onclick="loadPage('maintenance_coe_checklist.php')" class="btn btn-light shadow rounded-4 px-4 py-3 text-start" style="width: 180px; height: 120px;">
                         <i class="bi bi-journal-text fs-2 text-primary"></i><br>
                         <span class="fw-semibold text-dark">COE Checklist</span>
                     </button>

@@ -48,7 +48,7 @@ function COE_BenefitClaimRequest(employee_id) {
             //Attach textarea auto-resize
             bindTextareaAutoResize('req_reason');
 
-            const coeType = 'BENEFIT CLAIM WITH COMPENSATION';
+            const coeType = 'BENEFITS CLAIM';
             loadChecklist(coeType);
 
             // File Upload

@@ -110,6 +110,30 @@ function loadPage(page) {
     });
 }
 
+function Maintenance_COE_checklist(page) {
+  const mainContent = document.getElementById('main-content');
+
+  // Start with content hidden and shifted
+  mainContent.classList.add('loading');
+
+  fetch(page)
+    .then(response => response.text())
+    .then(data => {
+      mainContent.innerHTML = data;
+
+      // Trigger slide-in effect by removing the class after repaint
+      requestAnimationFrame(() => {
+        mainContent.classList.remove('loading');
+      });
+    })
+    .catch(error => {
+      mainContent.innerHTML = '<p class="text-danger">Error loading page.</p>';
+      console.error('Error:', error);
+      mainContent.classList.remove('loading');
+    });
+}
+
+
 
 document.getElementById('main-content').addEventListener('click', function (e) {
   if (e.target && e.target.id === 'coe-yes') {

@@ -1268,8 +1268,12 @@ function BENIFITCLAIM_COMPENSATION(buttonId) {
     btn.addEventListener("change", function () {
       if (this.checked) {
         coeTypeInput.value = "BENEFIT CLAIM WITH COMPENSATION";
+        const coeType = 'BENEFITS CLAIM WITH COMPENSATION';
+        loadChecklist(coeType);
       } else {
         coeTypeInput.value = "BENEFIT CLAIM";
+        const coeType = 'BENEFITS CLAIM';
+        loadChecklist(coeType);
       }
     });
   }
