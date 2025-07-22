@@ -82,6 +82,13 @@ $img_src = isValidBase64Image($picture)
                     </a>
                 </li>
 
+                <li>
+                    <a href="#" class="nav-link" data-page="maintenance_submenu.php" onclick="loadPage('maintenance_submenu.php')">
+                        <span class="ms-1 icon me-4"><ion-icon name="document-text-outline"></ion-icon></span>
+                        <span class="title">Maintenance</span>
+                    </a>
+                </li>
+
                 <input type="hidden" id="current_user" value="<?php echo htmlspecialchars($user_id); ?>" disabled>
             </ul>
         </div>
@@ -161,7 +168,7 @@ $img_src = isValidBase64Image($picture)
 
     <div id="alert-placeholder" style="position: fixed; top: 10px; right: 10px; z-index: 1056;"></div>
     <div id="alert-success-placeholder" style="position: fixed; top: 10px; right: 10px; z-index: 1056;"></div>
-
+    <!-- 
     <?php if (!isset($_SESSION['privacy_acknowledged'])): ?>
         <script>
             window.addEventListener('load', function() {
@@ -169,7 +176,7 @@ $img_src = isValidBase64Image($picture)
                 modal.show();
             });
         </script>
-    <?php endif; ?>
+    <?php endif; ?> -->
 
 
     <!-- Data Privacy Notice Modal -->
@@ -188,7 +195,7 @@ $img_src = isValidBase64Image($picture)
                         <li>We will not disclose your personal information to third parties without your consent.</li>
                         <li>You have the right to access, update, and request deletion of your data, subject to legal and contractual obligations.</li>
                     </ul>
-                    <p>By using this employee portal, you acknowledge and agree to the data practices outlined above.</p>
+                    <p>By using this employee portal, you acknowledge and agree to the data privacy practices outlined above.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-warning" data-bs-dismiss="modal">I Acknowledge</button>

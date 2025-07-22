@@ -7,7 +7,6 @@ if (!isset($_POST['employee_id'])) {
 }
 
 // Store BR number and include the fetch logic
-$_POST['employee_id'] = $_POST['employee_id'];
 include 'fetch/request_coe_employee.php';
 
 $employee_id = isset($_SESSION['employee_id']) ? $_SESSION['employee_id'] : '';
@@ -141,11 +140,35 @@ $emp_fullname = $_SESSION['firstname'] .
                 <input type="text" class="form-control rounded-4" id="travel_location" placeholder="Eg. Boracay, Philippines or Tokyo, Japan">
             </div>
 
+            <div class="col-md-12 mt-3 mb-4" id="checklist-section">
+                <div class="card shadow-sm rounded-4 border-0">
+                    <div class="card-header bg-danger text-white rounded-top-4">
+                        <h5 class="mb-0 text-center"><i class="fas fa-list-check me-2"></i>Checklist Requirements</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="checklistTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class= "bg-danger text-white" style="width: 25%;">Requirement</th>
+                                        <th class= "bg-danger text-white" style="width: 50%;">File</th>
+                                        <th class= "bg-danger text-white" style="width: 25%;">Remove</th>
+                                        <th class= "bg-danger text-white" style="width: 25%;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dynamicChecklist">
+                                    <!-- Checklist rows will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="col-md-12 ms-auto" id="attachment-section">
                 <div class="card shadow-sm rounded-4 overflow-hidden">
                     <div class="card-header bg-secondary text-white">
-                        <h5 class="mb-0">Supporting Documents</h5>
+                        <h5 class="mb-0 text-center">Additional Supporting Documents</h5>
                     </div>
                     <div class="card-body">
                         <form action="upload.php" method="post" enctype="multipart/form-data">
@@ -188,6 +211,7 @@ $emp_fullname = $_SESSION['firstname'] .
                                     </table>
                                 </div>
                             </div>
+
                         </form>
                     </div>
                 </div>

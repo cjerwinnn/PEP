@@ -14,6 +14,32 @@ function COE_BenefitClaimRequest(employee_id) {
             const reqIdInput = document.getElementById('req_id');
             reqIdInput.value = employee_id + '_' + generateCOEId();
 
+            fetch('fetch/policy/coe_dateneeded.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'coe_type=BENEFITS'
+            })
+                .then(res => res.text())
+                .then(days => {
+                    const leadDays = parseInt(days) || 0;
+                    const dateInput = document.getElementById('date_needed');
+
+                    const today = new Date();
+                    today.setDate(today.getDate() + leadDays);
+                    const minDate = today.toISOString().split('T')[0];
+
+                    dateInput.min = minDate;
+                    dateInput.value = minDate;
+
+                    const tooltipIcon = document.getElementById('date_notice_icon');
+                    tooltipIcon.setAttribute('title', `COE for Benefit Claim must be requested at least ${leadDays} day(s) in advance.`);
+
+                    // Re-initialize tooltip (Bootstrap)
+                    new bootstrap.Tooltip(tooltipIcon);
+                });
+
             BENIFITCLAIM_COMPENSATION('ck_compensation');
             //Modal Summary
             ShowSummary('submit_btn');
@@ -22,6 +48,8 @@ function COE_BenefitClaimRequest(employee_id) {
             //Attach textarea auto-resize
             bindTextareaAutoResize('req_reason');
 
+            const coeType = 'BENEFIT CLAIM WITH COMPENSATION';
+            loadChecklist(coeType);
 
             // File Upload
             const fileInput = document.getElementById('files');
@@ -56,7 +84,13 @@ function COE_TravelRequest(employee_id) {
             reqIdInput.value = employee_id + '_' + generateCOEId();
 
 
-            fetch('fetch/policy/coe_dateneeded.php')
+            fetch('fetch/policy/coe_dateneeded.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'coe_type=TRAVEL'
+            })
                 .then(res => res.text())
                 .then(days => {
                     const leadDays = parseInt(days) || 0;
@@ -83,6 +117,8 @@ function COE_TravelRequest(employee_id) {
             //Attach textarea auto-resize
             bindTextareaAutoResize('req_reason');
 
+            const coeType = 'TRAVEL';
+            loadChecklist(coeType);
 
             // File Upload
             const fileInput = document.getElementById('files');
@@ -117,6 +153,32 @@ function COE_FinancialRequest(employee_id) {
             const reqIdInput = document.getElementById('req_id');
             reqIdInput.value = employee_id + '_' + generateCOEId();
 
+            fetch('fetch/policy/coe_dateneeded.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'coe_type=FINANCIAL'
+            })
+                .then(res => res.text())
+                .then(days => {
+                    const leadDays = parseInt(days) || 0;
+                    const dateInput = document.getElementById('date_needed');
+
+                    const today = new Date();
+                    today.setDate(today.getDate() + leadDays);
+                    const minDate = today.toISOString().split('T')[0];
+
+                    dateInput.min = minDate;
+                    dateInput.value = minDate;
+
+                    const tooltipIcon = document.getElementById('date_notice_icon');
+                    tooltipIcon.setAttribute('title', `COE for Financial must be requested at least ${leadDays} day(s) in advance.`);
+
+                    // Re-initialize tooltip (Bootstrap)
+                    new bootstrap.Tooltip(tooltipIcon);
+                });
+
             //Modal Summary
             ShowSummary('submit_btn');
             //Submit Request
@@ -124,6 +186,8 @@ function COE_FinancialRequest(employee_id) {
             //Attach textarea auto-resize
             bindTextareaAutoResize('req_reason');
 
+            const coeType = 'FINANCIAL';
+            loadChecklist(coeType);
 
             // File Upload
             const fileInput = document.getElementById('files');
@@ -157,12 +221,42 @@ function COE_TrainingRequest(employee_id) {
             const reqIdInput = document.getElementById('req_id');
             reqIdInput.value = employee_id + '_' + generateCOEId();
 
+            fetch('fetch/policy/coe_dateneeded.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'coe_type=TRAINING'
+            })
+                .then(res => res.text())
+                .then(days => {
+                    const leadDays = parseInt(days) || 0;
+                    const dateInput = document.getElementById('date_needed');
+
+                    const today = new Date();
+                    today.setDate(today.getDate() + leadDays);
+                    const minDate = today.toISOString().split('T')[0];
+
+                    dateInput.min = minDate;
+                    dateInput.value = minDate;
+
+                    const tooltipIcon = document.getElementById('date_notice_icon');
+                    tooltipIcon.setAttribute('title', `COE for Training/Educational must be requested at least ${leadDays} day(s) in advance.`);
+
+                    // Re-initialize tooltip (Bootstrap)
+                    new bootstrap.Tooltip(tooltipIcon);
+                });
+
+
             //Modal Summary
             ShowSummary('submit_btn');
             //Submit Request
             ConfirmRequest('submit_request');
             //Attach textarea auto-resize
             bindTextareaAutoResize('req_reason');
+
+            const coeType = 'TRAINING/EDUCATIONAL';
+            loadChecklist(coeType);
 
 
             // File Upload

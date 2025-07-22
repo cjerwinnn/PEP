@@ -9,7 +9,6 @@
     }
 
     // Store BR number and include the fetch logic
-    $_POST['employee_id'] = $_POST['employee_id'];
     include 'fetch/request_coe_employee.php';
 
     $employee_id = isset($_SESSION['employee_id']) ? $_SESSION['employee_id'] : '';
@@ -32,7 +31,6 @@
     }
 
     // Store BR number and include the fetch logic
-    $_POST['request_id'] = $_POST['request_id'];
     include 'fetch/request_coe_fetch.php';
 
     // Now use $_SESSION variables to display content
@@ -198,6 +196,86 @@
                <div class="mb-4">
                    <label class="form-label small">Location<span class="text-danger"> *</span></label>
                    <input type="text" class="form-control rounded-4" id="travel_location" placeholder="Eg. Boracay, Philippines or Tokyo, Japan" value="<?php echo htmlspecialchars($travel_location); ?>" disabled>
+               </div>
+
+               <div class="col-md-12 mt-3 mb-4" id="checklist-section">
+                   <div class="card shadow-sm rounded-4 border-0">
+                       <div class="card-header bg-danger text-white rounded-top-4">
+                           <h5 class="mb-0 text-center"><i class="fas fa-list-check me-2"></i>Checklist Requirements</h5>
+                       </div>
+                       <div class="card-body p-0">
+                           <div class="table-responsive rounded-4">
+                               <table class="table table-hover align-middle mb-0" id="checklistTable">
+                                   <thead class="table-light">
+                                       <tr>
+                                           <th>Requirement</th>
+                                           <th>File</th>
+                                           <th>File Size</th>
+                                           <th>Status</th>
+                                       </tr>
+                                   </thead>
+                                   <tbody id="dynamicChecklist">
+                                       <!-- Checklist rows will be injected here -->
+                                       <?php
+                                        function ck_formatFileSizeDisplay($size)
+                                        {
+                                            $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+                                            $i = 0;
+
+                                            while ($size >= 1024 && $i < count($units) - 1) {
+                                                $size /= 1024;
+                                                $i++;
+                                            }
+
+                                            return number_format($size, 2) . ' ' . $units[$i];
+                                        }
+                                        ?>
+
+                                       <?php if (!empty($checkListData)): ?>
+                                           <?php foreach ($checkListData as $ck_attachment): ?>
+                                               <?php
+                                                $requirements_name = htmlspecialchars($ck_attachment['requirements_name']);
+                                                $stored = htmlspecialchars($ck_attachment['stored_filename']);
+                                                $original = htmlspecialchars($ck_attachment['original_filename']);
+                                                $checklist_required = htmlspecialchars($ck_attachment['checklist_required']);
+                                                ?>
+                                               <tr class="server-file-row">
+                                                   <td class="text-start">
+                                                       <?php echo htmlspecialchars($requirements_name); ?>
+                                                   </td>
+                                                   <td class="text-start">
+                                                       <?php if ($original === 'NO ATTACHMENT'): ?>
+                                                           <span class="badge bg-danger">No Attach files</span>
+                                                       <?php else: ?>
+                                                           <a href="view-file.php?file=<?= urlencode($stored); ?>" target="_blank" class="text-decoration-none">
+                                                               <?= htmlspecialchars($original); ?>
+                                                           </a>
+                                                       <?php endif; ?>
+                                                   </td>
+
+                                                   <td class="text-start file-size">
+                                                       <?php echo htmlspecialchars(ck_formatFileSizeDisplay($ck_attachment['file_size'])); ?>
+                                                   </td>
+                                                   <td class="text-start file-size">
+                                                       <?php if ($checklist_required == 1): ?>
+                                                           <span class="badge bg-danger">Required</span>
+                                                       <?php else: ?>
+                                                           <span class="badge bg-secondary">Optional</span>
+                                                       <?php endif; ?>
+                                                   </td>
+                                               </tr>
+
+                                           <?php endforeach; ?>
+                                       <?php else: ?>
+                                           <tr>
+                                               <td colspan="4" class="text-center">No Attachments found.</td>
+                                           </tr>
+                                       <?php endif; ?>
+                                   </tbody>
+                               </table>
+                           </div>
+                       </div>
+                   </div>
                </div>
 
 

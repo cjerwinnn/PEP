@@ -87,6 +87,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmtLogs->close();
 
 
+        // CHECKLIST ATTACHMENTS
+
+        $stmtLogs = $conn->prepare("CALL COE_CHECKLISTATTACHMENTS_FETCH(?,?)");
+        if (!$stmtLogs) {
+            die("Prepare failed: " . $conn->error);
+        }
+
+        $stmtLogs->bind_param('ss', $request_id, $coe_type);
+
+        if ($stmtLogs->execute()) {
+            $result_ckAttachments = $stmtLogs->get_result();
+
+            // Initialize an array to hold item data
+            $checkListData = [];
+            if ($result_ckAttachments->num_rows > 0) {
+                while ($rowItem = $result_ckAttachments->fetch_assoc()) {
+                    $checkListData[] = $rowItem;
+                }
+            }
+
+            // Store the items data in session
+            $_SESSION['checkListData'] = $checkListData;
+        } else {
+            die("Execute failed: " . $stmtLogs->error);
+        }
+
+        $stmtLogs->close();
+
+
         //TRAVEL
         if ($coe_type === 'TRAVEL') {
             // Prepare the statement

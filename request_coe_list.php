@@ -148,6 +148,9 @@ $employeeid = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
                             <div class="small text-muted mt-2 text-center">
                                 For visa applications, or international/local travel purposes.
                             </div>
+                            <div class="fst-italic small fw-bold text-danger mt-2 text-center">
+                                Approval of Manager/Supervisor is needed.
+                            </div>
                         </div>
                     </div>
 
@@ -163,6 +166,9 @@ $employeeid = isset($_SESSION['employeeid']) ? $_SESSION['employeeid'] : '';
                             </button>
                             <div class="small text-muted mt-2 text-center">
                                 For school enrollment, scholarship, or training-related documentation requirements.
+                            </div>
+                            <div class="fst-italic small fw-bold text-danger mt-2 text-center">
+                                Approval of Manager/Supervisor is needed.
                             </div>
                         </div>
                     </div>

@@ -179,6 +179,37 @@ function setupFileInput() {
   }
 }
 
+const MAX_CHECKLIST_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+function setupChecklistFileInputs() {
+  document.querySelectorAll('.file-input').forEach(input => {
+    input.addEventListener('change', function () {
+      const file = this.files[0];
+      const container = this.closest('.d-flex');
+      const fileNameSpan = container.querySelector('.file-name');
+      const checkIcon = container.querySelector('.fa-check-circle');
+
+      if (!file) {
+        fileNameSpan.textContent = 'No file chosen';
+        checkIcon.classList.add('d-none');
+        return;
+      }
+
+      if (file.size > MAX_CHECKLIST_FILE_SIZE) {
+        fileNameSpan.textContent = file.name + ' exceeds 10MB!';
+        fileNameSpan.classList.add('text-danger');
+        checkIcon.classList.add('d-none');
+        showAlert(`${file.name} exceeds the 10MB size limit.`);
+        this.value = ''; // Clear input
+      } else {
+        fileNameSpan.textContent = file.name;
+        fileNameSpan.classList.remove('text-danger');
+        checkIcon.classList.remove('d-none');
+      }
+    });
+  });
+}
+
 // ======= Textarea Auto-Resize =======
 function adjustTextareaHeight(textarea) {
   textarea.style.height = 'auto';
@@ -252,6 +283,23 @@ function ShowSummary(buttonId) {
       const dateNeeded = dateNeededElem.value.trim();
       const reason = reasonElem.value.trim();
 
+      const checklistRows = document.querySelectorAll('#dynamicChecklist .checklist-row[data-required="1"]');
+      let missingFiles = [];
+
+      checklistRows.forEach(row => {
+        const fileInput = row.querySelector('input[type="file"]');
+        const reqName = row.querySelector('.requirement-name')?.innerText || 'Unnamed Requirement';
+
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+          missingFiles.push(reqName);
+        }
+      });
+
+      if (missingFiles.length > 0) {
+        const list = missingFiles.map(name => `<li>${name}</li>`).join('');
+        return showAlert(`Please upload files for the following required items:<br><ul>${list}</ul>`);
+      }
+
       // Validation with alert and focus
       if (!empName) {
         empNameElem.focus();
@@ -298,6 +346,7 @@ function ShowSummary(buttonId) {
         const dateReturn = dateReturnElem.value.trim();
         const travelType = travelTypeElem.selectedOptions[0]?.text || '';
         const location = locationElem.value.trim();
+
 
         if (!dateFrom) {
           dateFromElem.focus();
@@ -372,28 +421,28 @@ function ShowSummary(buttonId) {
       }
 
       const summaryHtml = `
-  <div class="d-flex flex-column gap-3">
-    <div class="p-3 bg-light rounded-3 shadow-sm">
-      <h6 class="mb-1 text-primary">Employee Details</h6>
-      ${infoRow("Employee ID", empId)}
-      ${infoRow("Name", empName)}
-      ${infoRow("Department", dept)}
-      ${infoRow("Area/Section", area)}
-      ${infoRow("Position", position)}
-    </div>
+          <div class="d-flex flex-column gap-3">
+            <div class="p-3 bg-light rounded-3 shadow-sm">
+              <h6 class="mb-1 text-primary">Employee Details</h6>
+              ${infoRow("Employee ID", empId)}
+              ${infoRow("Name", empName)}
+              ${infoRow("Department", dept)}
+              ${infoRow("Area/Section", area)}
+              ${infoRow("Position", position)}
+            </div>
 
-    <div class="p-3 bg-light rounded-3 shadow-sm">
-      <h6 class="mb-1 text-primary">Request Details</h6>
-            ${infoRow("COE Type", CoeType)}
-      <br>
-      ${infoRow("Reason", reason.replace(/\n/g, '<br>'))}
-      ${infoRow("Date Needed", formatDate(dateNeeded))}
-      ${infoRow("Receiving Format", receivingFormat)}
-    </div>
+            <div class="p-3 bg-light rounded-3 shadow-sm">
+              <h6 class="mb-1 text-primary">Request Details</h6>
+                    ${infoRow("COE Type", CoeType)}
+              <br>
+              ${infoRow("Reason", reason.replace(/\n/g, '<br>'))}
+              ${infoRow("Date Needed", formatDate(dateNeeded))}
+              ${infoRow("Receiving Format", receivingFormat)}
+            </div>
 
-    ${travelInfoHtml}
-  </div>
-`;
+            ${travelInfoHtml}
+          </div>
+        `;
 
       // Open the SubmitModal
       const modal = new bootstrap.Modal(document.getElementById('SubmitModal'));
@@ -454,6 +503,7 @@ function ConfirmRequest(buttonId) {
         },
         success: function (response) {
           console.log('Server Response:', response);
+          uploadChecklistFiles(req_Id, user_Id);
           uploadSelectedFiles(req_Id, user_Id);
         },
         error: function (xhr, status, error) {
@@ -516,6 +566,43 @@ function uploadSelectedFiles(req_id, userId) {
     .catch(error => {
       console.error('Error uploading files:', error);
       alert('File upload failed.');
+    });
+}
+
+//upload checklist
+
+function uploadChecklistFiles(requestId, userId) {
+  const formData = new FormData();
+
+  document.querySelectorAll('input[type="file"][id^="file_input_"]').forEach(input => {
+    const file = input.files[0];
+    if (file) {
+      const checklistId = input.dataset.checklistId;
+      formData.append('checklist_files[]', file);
+      formData.append('checklist_ids[]', checklistId);
+    }
+  });
+
+  formData.append('request_id', requestId);
+  formData.append('user_id', userId);
+
+  fetch('uploads/request_coe_checklist_upload.php', {
+    method: 'POST',
+    body: formData
+  })
+    .then(response => response.text())
+    .then(result => {
+      console.log('Checklist Upload Result:', result);
+
+      // Show success icon beside each uploaded item
+      document.querySelectorAll('input[type="file"][id^="file_input_"]').forEach(input => {
+        const checklistId = input.dataset.checklistId;
+        const successEl = document.getElementById('checklistSuccess_' + checklistId);
+        if (successEl) successEl.classList.remove('d-none');
+      });
+    })
+    .catch(error => {
+      console.error('Checklist Upload Error:', error);
     });
 }
 
@@ -1453,4 +1540,114 @@ function Hide_Compensation() {
   document.getElementById('div_view_compensation').classList.remove('d-none');
   document.getElementById('compensation_wrapper').classList.add('d-none');
   document.getElementById('compensation_wrapper').innerHTML = '';
+}
+
+
+function loadChecklist(coeType) {
+  fetch('fetch/fetch_coe_checklist.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'coe_type=' + encodeURIComponent(coeType)
+  })
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.getElementById('dynamicChecklist');
+      tbody.innerHTML = '';
+
+      if (!Array.isArray(data) || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No checklist items found.</td></tr>';
+        return;
+      }
+
+      data.forEach((item, index) => {
+        const isRequired = item.checklist_required == '1';
+        const fileId = `file_input_${index}`;
+
+        const row = document.createElement('tr');
+        row.classList.add('checklist-row');
+        if (isRequired) row.setAttribute('data-required', '1');
+
+        row.innerHTML = `
+        <td>
+            <strong class="requirement-name">${item.requirements_name}</strong><br>
+            <small class="text-muted">${item.requirements_description}</small>
+        </td>
+        <td>
+            <div class="d-flex align-items-center gap-2">
+                <label for="${fileId}" class="btn btn-outline-primary rounded-4 btn-sm mb-0">
+                    <i class="fas fa-paperclip me-1"></i>Attach
+                </label>
+                <input type="file" 
+                    class="d-none file-input" 
+                    name="requirement_files[]" 
+                    id="${fileId}" 
+                    data-checklist-id="${item.requirements_name}" 
+                    data-required="${isRequired}" 
+                    ${isRequired ? 'required' : ''}
+                    accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png,.gif,.bmp,.tiff" />
+
+                <span class="file-name text-muted small fst-italic">No file chosen</span>
+                <i class="fa-solid fa-circle-check text-success fs-5 d-none" id="checklistSuccess_${item.checklist_id}" title="Uploaded"></i>
+            </div>
+        </td>
+        <td>
+                <button type="button" class="btn btn-outline-danger rounded-4 btn-sm remove-file" title="Clear file">
+                  Remove
+                </button>
+        </td>
+        <td>
+            ${isRequired
+            ? '<span class="badge bg-danger">Required</span>'
+            : '<span class="badge bg-secondary">Optional</span>'}
+        </td>
+    `;
+
+        // Add functionality to update file name on selection
+        const fileInput = row.querySelector(`#${fileId}`);
+        const fileNameSpan = row.querySelector('.file-name');
+        const checkIcon = row.querySelector(`#checklistSuccess_${item.checklist_id}`);
+        const removeBtn = row.querySelector('.remove-file');
+
+        fileInput.addEventListener('change', () => {
+          if (fileInput.files.length > 0) {
+            fileNameSpan.textContent = fileInput.files[0].name;
+            checkIcon.classList.remove('d-none');
+          } else {
+            fileNameSpan.textContent = "No file chosen";
+            checkIcon.classList.add('d-none');
+          }
+        });
+
+        // Clear file input when remove is clicked
+        removeBtn.addEventListener('click', () => {
+          fileInput.value = '';
+          fileNameSpan.textContent = "No file chosen";
+          checkIcon.classList.add('d-none');
+        });
+
+        tbody.appendChild(row);
+      });
+
+      // Attach onchange listener for all file inputs
+      document.querySelectorAll('.file-input').forEach(input => {
+        input.addEventListener('change', function () {
+          const container = this.closest('.d-flex');
+          const fileName = container.querySelector('.file-name');
+          const checkIcon = container.querySelector('.fa-check-circle');
+
+          if (this.files.length > 0) {
+            fileName.textContent = this.files[0].name;
+            checkIcon.classList.remove('d-none');
+          } else {
+            fileName.textContent = 'No file chosen';
+            checkIcon.classList.add('d-none');
+          }
+        });
+      });
+    })
+    .catch(err => {
+      console.error('Checklist fetch error:', err);
+      document.getElementById('dynamicChecklist').innerHTML =
+        '<tr><td colspan="4" class="text-danger text-center">Failed to load checklist.</td></tr>';
+    });
 }
