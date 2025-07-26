@@ -19,9 +19,12 @@ include 'config/connection.php';
                         <tr class="bg-dark text-white text-center rounded-4">
                             <th class="bg-primary text-white" style="min-width: 30px;">Request ID</th>
                             <th class="bg-primary text-white" style="min-width: 150px;">Employee</th>
+                            <th class="bg-primary text-white" style="min-width: 150px;">Department</th>
+                            <th class="bg-primary text-white" style="min-width: 150px;">Area</th>
+                            <th class="bg-primary text-white" style="min-width: 150px;">Position</th>
                             <th class="bg-primary text-white" style="min-width: 30px;">COE Type</th>
-                            <th class="bg-primary text-white" style="min-width: 120px;">Date & Time Requested</th>
-                            <th class="bg-primary text-white" style="min-width: 100px;">Status</th>
+                            <th class="bg-primary text-white" style="min-width: 80px;">Date & Time Requested</th>
+                            <th class="bg-primary text-white" style="min-width: 50px;">Status</th>
                             <th class="bg-primary text-white" style="min-width: 100px;">Action</th>
                         </tr>
                     </thead>
@@ -49,6 +52,9 @@ include 'config/connection.php';
                             echo "<tr>";
                             echo "<td class='text-start text-wrap'>" . htmlspecialchars($row['request_id']) . "</td>";
                             echo "<td class='text-start text-wrap'>" . htmlspecialchars($row['employee']) . "</td>";
+                            echo "<td class='text-start text-wrap'>" . htmlspecialchars($row['department']) . "</td>";
+                            echo "<td class='text-start text-wrap'>" . htmlspecialchars($row['area']) . "</td>";
+                            echo "<td class='text-start text-wrap'>" . htmlspecialchars($row['position']) . "</td>";
                             echo "<td class='text-start text-wrap'>" . htmlspecialchars($row['coe_type']) . "</td>";
                             echo "<td class='text-center'>" . htmlspecialchars($formattedDate) . ' ' . htmlspecialchars($row['requested_time']) . "</td>";
                             echo "<td class='text-center text-wrap'>" . htmlspecialchars($row['request_status']) . "</td>";
