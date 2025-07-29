@@ -464,6 +464,7 @@ function ConfirmRequest(buttonId) {
       // Header Data
       formData.append('request_id', $('#req_id').val());
       formData.append('employee_id', $('#emp_id').val());
+      formData.append('emp_area', $('#emp_area').val());
       formData.append('req_coe_type', $('#req_coe_type').val());
       formData.append('request_reason', $('#req_reason').val());
       formData.append('date_needed', $('#date_needed').val());
@@ -608,12 +609,143 @@ function uploadChecklistFiles(requestId, userId) {
 
 // Approved
 
+function Fetch_ApprovalFlow(buttonId) {
+  const btn = document.getElementById(buttonId);
+  if (btn) {
+    btn.addEventListener("click", function () {
+
+      let approver_level = 0;
+      let isApproved = '';
+
+      const empArea = document.getElementById('emp_area').value;
+      const request_id = document.getElementById('req_id').value;
+
+      const formData = new FormData();
+      formData.append('requestor_area', empArea);
+      formData.append('request_id', request_id);
+
+      fetch('fetch/coe/coe_approvalflow_fetch.php', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          const list = document.getElementById('approvalFlowList');
+          list.innerHTML = '';
+
+          data.forEach(item => {
+            const li = document.createElement('li');
+
+            const currentUserId = document.getElementById('current_user_id').value;
+            const approver_id = item.approvers_employeeid;
+            const isCurrentUser = approver_id == currentUserId;
+
+            if (isCurrentUser) {
+              approver_level = item.approver_level;
+              isApproved = item.tagged_status;
+            }
+
+            const borderClass = isCurrentUser ? 'bg-light border border-info border-2' : 'border-1';
+
+            li.className = `list-group-item p-4 rounded-4 shadow-sm mb-3 ${borderClass}`;
+
+            // Format tagged datetime
+            const hasTagged = item.tagged_date && item.tagged_time;
+            const formattedDateTime = hasTagged
+              ? `<div class="text-muted small"><i class="bi bi-calendar-check"></i> ${item.tagged_date} ${item.tagged_time}</div>`
+              : `<div class="text-muted small fst-italic"></div>`;
+
+            // Approver department, area, position
+            const approverDetails = `
+              <div class="text-secondary small mb-1">
+                <i class="bi bi-building"></i> ${item.department || '—'} |
+                <i class="bi bi-geo-alt"></i> ${item.area || '—'} |
+                <i class="bi bi-person-badge"></i> ${item.position || '—'}
+              </div>
+            `;
+
+            // Remarks
+            const remarks = item.tagged_remarks
+              ? `<div class="small text-muted fst-italic mb-2 mt-2">Remarks: ${item.tagged_remarks}</div>`
+              : '';
+
+            // Status badge with colors
+            const statusClass = item.tagged_status === 'APPROVED' ? 'bg-success' :
+              item.tagged_status === 'DENIED' ? 'bg-danger' :
+                item.tagged_status === 'PENDING' ? 'bg-warning text-dark' :
+                  'bg-secondary';
+
+            li.innerHTML = `
+            <div class="d-flex justify-content-between align-items-start flex-wrap">
+              <div class="me-3">
+                <h6 class="mb-1">
+                  Level ${item.approver_level} — 
+                  <span class="fw-semibold">${item.employee}</span>
+                </h6>
+                ${approverDetails}
+                <span class="mt-2">${remarks}</span>
+                ${formattedDateTime}
+              </div>
+              <span class="badge rounded-pill px-3 py-2 fs-10 mt-2 ${statusClass}">
+                ${item.tagged_status}
+              </span>
+            </div>
+          `;
+
+            list.appendChild(li);
+          });
+
+          checkLowerLevelApprovals(approver_level, isApproved)
+          document.getElementById('approver_level').value = approver_level;
+
+        })
+        .catch(error => {
+          console.error('Error fetching approval flow:', error);
+        });
+
+    });
+  }
+}
+
+
+function checkLowerLevelApprovals(approverlevel, isApproved) {
+
+  const formData = new FormData();
+
+  formData.append('request_id', $('#req_id').val());
+  formData.append('current_level', approverlevel);
+
+  fetch('fetch/coe/coe_request_checkapprovals.php', {
+    method: 'POST',
+    body: formData
+  })
+    .then(res => res.text())
+    .then(response => {
+      if (response.trim() === 'PROCEED') {
+        if (isApproved == 'APPROVED') {
+          document.getElementById('approver-access').classList.add('d-none');
+          document.getElementById('waiting-approval-access').innerHTML = '';
+        } else {
+          document.getElementById('approver-access').classList.remove('d-none');
+          document.getElementById('waiting-approval-access').innerHTML = '';
+        }
+      } else {
+        document.getElementById('approver-access').classList.add('d-none');
+        document.getElementById('waiting-approval-access').innerHTML = 'Waiting for prior approvals...';
+
+      }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// Approved
+
 function ApprovedCOERequest(buttonId) {
   const btn = document.getElementById(buttonId);
   if (btn) {
     btn.addEventListener("click", function () {
-      const formData = new FormData();
 
+      const formData = new FormData();
       // Header Data
       formData.append('request_id', $('#req_id').val());
       formData.append('employee_id', $('#emp_id').val());
@@ -626,13 +758,12 @@ function ApprovedCOERequest(buttonId) {
       formData.append('requested_by', $('#emp_id').val());
       formData.append('tagged_by', $('#current_user').val());
       formData.append('request_status', 'APPROVED');
+      formData.append('approver_level', document.getElementById('approver_level').value);
       //APPROVAL REMARKS
       formData.append('approval_remarks', $('#approval_remarks').val());
-      const req_Id = $('#req_id').val();
-      const user_Id = $('#emp_id').val();
 
       $.ajax({
-        url: 'updates/request_coe_approved_update.php',
+        url: 'updates/request_coe_approval_update.php',
         type: 'POST',
         data: formData,
         processData: false,
@@ -653,16 +784,20 @@ function ApprovedCOERequest(buttonId) {
             allowEscapeKey: false
           }).then((result) => {
             if (result.isConfirmed) {
-              const page = 'request_coe_list.php';
-              fetch(page)
-                .then(response => response.text())
-                .then(data => {
-                  document.getElementById('main-content').innerHTML = data;
-                })
-                .catch(error => {
-                  document.getElementById('main-content').innerHTML = '<p>Error loading content.</p>';
-                  console.error('Error:', error);
-                });
+
+  
+              // const page = 'request_coe_list.php';
+              // fetch(page)
+              //   .then(response => response.text())
+              //   .then(data => {
+              //     document.getElementById('main-content').innerHTML = data;
+              //   })
+              //   .catch(error => {
+              //     document.getElementById('main-content').innerHTML = '<p>Error loading content.</p>';
+              //     console.error('Error:', error);
+              //   });
+
+              COE_ApprovalView($('#req_id').val(), $('#emp_id').val(), $('#req_coe_type').val())
             }
           });
         },
@@ -673,6 +808,7 @@ function ApprovedCOERequest(buttonId) {
           $('#no-btn').prop('disabled', false);
         }
       });
+      
     });
   }
 }

@@ -7,7 +7,6 @@ if (!isset($_POST['employee_id'])) {
 }
 
 // Store BR number and include the fetch logic
-$_POST['employee_id'] = $_POST['employee_id'];
 include 'fetch/request_coe_employee.php';
 
 $employee_id = isset($_SESSION['employee_id']) ? $_SESSION['employee_id'] : '';

@@ -3,6 +3,7 @@ include '../config/connection.php';
 
 $request_id = $_POST['request_id'];
 $employee_id = $_POST['employee_id'];
+$emp_area = $_POST['emp_area'];
 $req_coe_type = $_POST['req_coe_type'];
 
 // Header data
@@ -25,6 +26,34 @@ try {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt1->bind_param("ssssssssss", $request_id, $employee_id, $req_coe_type, $request_reason, $date_needed, $request_format, $requested_date, $requested_time, $requested_by, $request_status);
     $stmt1->execute();
+
+    $stmtFlow = $conn->prepare("CALL COE_FETCH_APPROVAL_PERAREA(?)");
+    $stmtFlow->bind_param("s", $emp_area);
+    $stmtFlow->execute();
+    $resultFlow = $stmtFlow->get_result();
+
+    $approvers = [];
+    while ($row = $resultFlow->fetch_assoc()) {
+        $approvers[] = $row;
+    }
+
+    $resultFlow->free();
+    $stmtFlow->close();
+
+    $insertStmt = $conn->prepare("INSERT INTO request_coe_approvals_details (
+    request_id, approver_employeeid, approver_level, override_access, 
+    tagged_remarks, tagged_status, tagged_date, tagged_time) VALUES (?, ?, ?, ?, '', 'PENDING', NULL, NULL)");
+
+    foreach ($approvers as $row) {
+        $approver_id = $row['approvers_employeeid'];
+        $approver_level = $row['approver_level'];
+        $override_access = $row['override_access'];
+
+        $insertStmt->bind_param("ssii", $request_id, $approver_id, $approver_level, $override_access);
+        $insertStmt->execute();
+    }
+
+    $insertStmt->close();
 
     if ($req_coe_type === 'BENEFIT CLAIM' || $req_coe_type === 'BENEFIT CLAIM WITH COMPENSATION') {
         // Benifit Claim data

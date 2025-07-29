@@ -350,6 +350,7 @@ function COE_ApprovalView(request_id, employee_id, coe_type) {
 
             bindTextareaAutoResize('approval_remarks');
             bindTextareaAutoResize('decline_reason');
+            Fetch_ApprovalFlow('approver_btn');
             ApprovedCOERequest('approved_request');
             DeclinedCOERequest('declined_request');
         })

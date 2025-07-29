@@ -133,6 +133,32 @@ function Maintenance_COE_checklist(page) {
     });
 }
 
+function Maintenance_COE_Approval(page) {
+  const mainContent = document.getElementById('main-content');
+
+  // Start with content hidden and shifted
+  mainContent.classList.add('loading');
+
+  fetch(page)
+    .then(response => response.text())
+    .then(data => {
+      mainContent.innerHTML = data;
+      loadDepartments()
+
+      setupApprovalLevelAssignment()
+
+      Approvalflow_Search('add_approvallevel_search', 'employees_tbody')
+      
+      requestAnimationFrame(() => {
+        mainContent.classList.remove('loading');
+      });
+    })
+    .catch(error => {
+      mainContent.innerHTML = '<p class="text-danger">Error loading page.</p>';
+      console.error('Error:', error);
+      mainContent.classList.remove('loading');
+    });
+}
 
 
 document.getElementById('main-content').addEventListener('click', function (e) {

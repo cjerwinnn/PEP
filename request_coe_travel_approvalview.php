@@ -100,6 +100,8 @@
                    </td>
                </h5>
 
+               <input type="hidden" id="current_user_id" value="<?php echo htmlspecialchars(string: $user_id); ?>">
+
                <div class="row mb-2">
                    <div class="col-md-4 mb-4">
                        <label class="form-label small">Request ID</label>
@@ -411,9 +413,9 @@
                </div>
 
                <?php if ($request_status == 'PENDING'): ?>
-                   <div class="text-end mt-4">
-                       <button type="button" id="submit_btn" class="btn btn-success px-4 rounded-4 mb-2" data-bs-toggle="modal" data-bs-target="#ApproveModal">Approve Request</button>
-                       <button type="button" id="submit_btn" class="btn btn-danger px-4 rounded-4 mb-2" data-bs-toggle="modal" data-bs-target="#DeclineModal">Decline Request</button>
+                   <div id="btn-section" class="text-end mt-4">
+                       <button type="button" id="approver_btn" class="btn btn-success px-4 rounded-4 mb-2" data-bs-toggle="modal" data-bs-target="#ApproveModal">Approve Request</button>
+                       <button type="button" id="decline_btn" class="btn btn-danger px-4 rounded-4 mb-2" data-bs-toggle="modal" data-bs-target="#DeclineModal">Decline Request</button>
                    </div>
                <?php endif; ?>
 
@@ -445,21 +447,32 @@
 
    <!-- Approve Modal -->
    <div class="modal fade" id="ApproveModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="true" aria-labelledby="ApproveModalLabel" aria-hidden="true">
-       <div class="modal-dialog modal-m modal-dialog-centered rounded-4">
+       <div class="modal-dialog modal-xl modal-dialog-centered rounded-4">
            <div class="modal-content rounded-4">
                <div class="modal-header py-2 bg-success text-white">
                    <h5 class="modal-title">Approve Request</h5>
                    <button type="button" class="btn-close text-white" data-bs-dismiss="modal"></button>
                </div>
-               <div class="modal-body">
-                   <div class="mb-2">
-                       <label for="approval_remarks" class="form-label small">
-                           Approval Remarks
-                       </label>
-                       <textarea class="form-control rounded-4" id="approval_remarks" rows="2" placeholder="Remarks..."></textarea>
+               <div class="modal-body" class="rounded-4 border-1 border-danger">
+                   <div class="mb-2" style="max-height: 400px; overflow-y: auto;">
+                       <ul id="approvalFlowList" class="list-group"></ul>
                    </div>
-                   <div class="text-end">
-                       <button type="button" id="approved_request" class="btn btn-success rounded-4" data-bs-dismiss="modal">Approve</button>
+
+                   <div class="mb-2">
+                       <input type="hidden" id="approver_level">
+                   </div>
+                   <div id="approver-access" class="d-none mt-4">
+                       <div class="mb-2">
+                           <label for="approval_remarks" class="form-label small">
+                               Approval Remarks
+                           </label>
+                           <textarea class="form-control rounded-4" id="approval_remarks" rows="2" placeholder="Remarks..."></textarea>
+                       </div>
+                       <div class="text-end">
+                           <button type="button" id="approved_request" class="btn btn-success rounded-4" data-bs-dismiss="modal">Approve</button>
+                       </div>
+                   </div>
+                   <div id="waiting-approval-access" class="text-danger">
                    </div>
                </div>
            </div>
