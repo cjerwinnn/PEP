@@ -443,7 +443,7 @@ body {
 }
 
 /* MAIN CONTENT */
-/* 
+
 #main-content {
   opacity: 1;
   transform: translateX(0);
@@ -453,4 +453,4 @@ body {
 #main-content.loading {
   opacity: 0;
   transform: translateX(100px);
-} */
+}

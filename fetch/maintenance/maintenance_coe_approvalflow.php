@@ -18,9 +18,10 @@ $rows = '';
 
 while ($row = $result->fetch_assoc()) {
     $level = htmlspecialchars($row['approver_level']);
+    $approvers_employeeid = htmlspecialchars($row['approvers_employeeid']);
     $approver = htmlspecialchars($row['approver_name']);
     $department = htmlspecialchars($row['approver_department']);
-    $area = htmlspecialchars($row['approver_area']);
+    $approver_area = htmlspecialchars($row['approver_area']);
     $position = htmlspecialchars($row['approver_position']);
     $override = htmlspecialchars($row['override_access']);
 
@@ -31,13 +32,18 @@ while ($row = $result->fetch_assoc()) {
     }
 
     // You can customize the action column with buttons or icons
-    $action = '<button class="btn btn-sm btn-danger rounded-4">Remove</button>';
+    $action = "<button class='btn btn-sm btn-danger rounded-4 btn-remove' 
+            data-empid='" . htmlspecialchars($approvers_employeeid) . "'
+            data-area='" . htmlspecialchars($area) . "'
+            data-level='" . htmlspecialchars($level) . "'>
+              Remove
+           </button>";
 
     $rows .= "<tr class='text-center'>
                 <td class='text-center text-dark fw-bold'>$level</td>
                 <td class='text-start'>$approver</td>
                 <td class='text-center'>$department</td>
-                <td class='text-center'>$area</td>
+                <td class='text-center'>$approver_area</td>
                 <td class='text-center'>$position</td>
                 <td>$override</td>
                 <td>$action</td>
@@ -48,4 +54,3 @@ $stmt->close();
 $conn->next_result();
 
 echo $rows;
-?>

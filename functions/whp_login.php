@@ -78,7 +78,7 @@ if ($username && $password) {
             $_SESSION['user_fullname'] = $user['user_fullname'];
 
             $stmt->close();
-            header("Location: ../main.php");
+            header("Location: ../pages/main.php");
             exit;
         } else {
             $stmt->close();

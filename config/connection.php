@@ -5,7 +5,7 @@ $servername = "192.168.1.101";
 $username = "apphiisdb";
 $password = "ABCD1234";
 $dbname = "whp_live_db";
-$dbname2 = "hris_live_db";
+$dbname2 = "testhris_dev_db";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 

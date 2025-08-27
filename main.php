@@ -74,6 +74,13 @@ $img_src = isValidBase64Image($picture)
                         <span class="title">C.O.E</span>
                     </a>
                 </li>
+                
+                <li>
+                    <a href="pages/wtm_submenu.php" class="nav-link">
+                        <span class="ms-1 icon me-4"><ion-icon name="time-outline"></ion-icon></span>
+                        <span class="title">WTM</span>
+                    </a>
+                </li>
 
                 <li>
                     <a href="#" onclick="Load_ChatDesk()">
@@ -128,6 +135,7 @@ $img_src = isValidBase64Image($picture)
                                 <div>
                                     <div class="fw-bold text-dark"><?= htmlspecialchars($user_fullname) ?></div>
                                     <div class="text-muted small"><?= htmlspecialchars($user_id ?? '') ?></div>
+                                    <input type="hidden" id="employeeId" value="<?= htmlspecialchars($user_id ?? '') ?>">
                                     <div class="text-muted small"><?= htmlspecialchars($email ?? '') ?></div>
                                 </div>
                             </div>
