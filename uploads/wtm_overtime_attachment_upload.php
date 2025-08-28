@@ -7,11 +7,11 @@ $uploadDirectory = '../attachments/overtime/'; // Ensure this folder exists on t
 $maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
 
 // Ensure that request_id is provided
-if (!isset($_POST['request_id']) || empty($_POST['request_id'])) {
-    die("request_id is required.");
+if (!isset($_POST['overtime_id']) || empty($_POST['overtime_id'])) {
+    die("overtime_id is required.");
 }
 
-$request_id = $_POST['request_id']; 
+$overtime_id = $_POST['overtime_id']; 
 
     foreach ($_FILES['files']['name'] as $key => $originalFilename) {
         $fileTmpPath = $_FILES['files']['tmp_name'][$key];
@@ -38,19 +38,19 @@ $request_id = $_POST['request_id'];
         }
 
         // Assuming you already have a valid database connection ($conn)
-        $stmt = $conn->prepare("INSERT INTO request_coe_attachments 
-            (request_id, original_filename, stored_filename, file_type, file_size, file_extension, upload_date, uploaded_time, uploaded_by)
+        $stmt = $conn2->prepare("INSERT INTO timekeeping_overtime_attachment 
+            (overtime_id, original_filename, stored_filename, file_type, file_size, file_extension, upload_date, uploaded_time, uploaded_by)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         
         if (!$stmt) {
-            throw new Exception("Prepare failed: " . $conn->error);
+            throw new Exception("Prepare failed: " . $conn2->error);
         }
 
         $userId = $_POST['user_id'];
         
         $stmt->bind_param(
             "sssssssss",
-            $request_id,
+            $overtime_id,
             $originalFilename,
             $storedFilename,
             $fileType,

@@ -41,6 +41,26 @@ function showAlert(message) {
     }
 }
 
+function showSuccess(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success alert-dismissible fade show';
+    alertDiv.role = 'alert';
+    alertDiv.innerHTML = `
+        <strong>Success!</strong> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+    document.getElementById('alert-placeholder').append(alertDiv);
+
+    setTimeout(() => {
+        // Bootstrap's fade out and remove element
+        alertDiv.classList.remove('show');
+        alertDiv.classList.add('hide');
+        // Remove from DOM after fade out transition (usually 150ms)
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 150);
+    }, 2000);
+}
+
 
 
 function FetchEmployeeDetails(employeeId) {
@@ -109,8 +129,18 @@ function loadAttendance(employeeId, startDate, endDate) {
     const start = startDate;
     const end = endDate;
 
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric'
+        });
+    }
+
     const attendanceTableBody = document.querySelector('#attendanceTable tbody');
-    attendanceTableBody.innerHTML = '<tr><td colspan="16" class="text-center">Loading Daily Time Record...</td></tr>';
+    attendanceTableBody.innerHTML = '<tr><td colspan="16" class="text-center">Loading Daily Time Record for ' + formatDate(startDate) + ' to ' + formatDate(endDate) + '.</td></tr>';
 
     fetch(`../fetch/wtm/wtm_mydtr_fetch.php?employeeid=${employeeId}&start=${start}&end=${end}`, {
         cache: 'no-store'
@@ -324,8 +354,7 @@ function initializeFormModal(modalId = 'DTRDetailModal') {
                 if (data.overtime > 0) {
                     if (data.AllowedInOT == '1') {
                         overtimeHTML += ` <button type="button" 
-                        data-bs-toggle="modal" 
-                        data-bs-target="#OvertimeModal"
+                        onclick="fileOvertime('${employeeid}', '${selected_date}')"
                         class="btn btn-sm btn-outline-success rounded-4 ms-2 mb-2 mt-2 small">
                         File Overtime</button>`;
                     }
@@ -355,6 +384,7 @@ function initializeShiftModal(modalId = 'ChangeShiftModal') {
     if (!formModal) return;
 
     formModal.addEventListener('show.bs.modal', function (event) {
+
         const button = event.relatedTarget;
         if (!button) return;
 
@@ -565,6 +595,7 @@ function initializeOTModal(modalId = 'OvertimeModal') {
     if (!formModal) return;
 
     formModal.addEventListener('show.bs.modal', function (event) {
+
         const button = event.relatedTarget;
         if (!button) return;
 
@@ -575,7 +606,7 @@ function initializeOTModal(modalId = 'OvertimeModal') {
             return;
         }
 
-        document.getElementById('hidden_date_selected').value = selected_date;
+        document.getElementById('ot_hidden_date_selected').value = selected_date;
 
         // 1. Fetch Employee DTR Details
         $.ajax({
@@ -621,8 +652,7 @@ function initializeOTModal(modalId = 'OvertimeModal') {
                             return;
                         }
 
-                        // remove all options except the first placeholder
-                        dropdown.options.length = 1;
+                        dropdown.innerHTML = '<option value="" disabled selected>Select a type...</option>';
 
                         ot_types.forEach(ott => {
                             const option = document.createElement('option');
@@ -638,11 +668,16 @@ function initializeOTModal(modalId = 'OvertimeModal') {
                     }
                 });
 
-                formModal.querySelector('#modal-in').innerHTML = shiftText;
+                formModal.querySelector('#ot-shiftschedule').innerHTML = shiftText;
                 formModal.querySelector('#ot-time-in').innerHTML = formatTime(data.timein);
                 formModal.querySelector('#ot-time-out').innerHTML = formatTime(data.timeout);
                 formModal.querySelector('#ot-excess').innerHTML = data.overtime;
-                formModal.querySelector('#ot-file').value = data.overtime;
+
+                const ot_file = document.getElementById('ot-file');
+                ot_file.value = data.overtime;
+                ot_file.max = data.overtime;
+                ot_file.min = 1.0;
+                ot_file.step = 0.5;
 
             },
             error: function (xhr, status, error) {
@@ -653,3 +688,237 @@ function initializeOTModal(modalId = 'OvertimeModal') {
 }
 
 initializeOTModal();
+
+//OT ATTACHMENTS
+
+// ======= File Upload & Preview =======
+let selectedFiles = [];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+function handleFileSelect(event) {
+    const fileInput = event.target;
+    const files = Array.from(fileInput.files);
+    let errorMessages = [];
+    let successCount = 0;
+
+    files.forEach(file => {
+        if (file.size > MAX_FILE_SIZE) {
+            errorMessages.push(`${file.name} (${formatFileSize(file.size)}) exceeds the 10MB size limit`);
+            return;
+        }
+
+        if (!selectedFiles.some(existing => existing.name === file.name && existing.size === file.size)) {
+            selectedFiles.push(file);
+            successCount++;
+        }
+    });
+
+    fileInput.value = '';
+
+    if (errorMessages.length > 0) {
+        errorMessages.forEach(msg => showAlert(msg, 'error'));
+    }
+
+    if (successCount > 0) {
+        showSuccess(`Successfully added ${successCount} file${successCount > 1 ? 's' : ''}.`);
+    }
+
+    showFileList();
+}
+
+function showFileList() {
+    const fileListElement = document.getElementById('fileList')?.getElementsByTagName('tbody')[0];
+    const attachmentList = document.getElementById('attachment-list');
+
+    if (!fileListElement || !attachmentList) return;
+
+    fileListElement.innerHTML = '';
+
+    if (selectedFiles.length === 0) {
+        attachmentList.style.display = 'none';
+        return;
+    }
+
+    attachmentList.style.display = 'block';
+
+    selectedFiles.forEach((file, index) => {
+        const row = document.createElement('tr');
+        row.id = `file-${index}`;
+
+        const fileSize = formatFileSize(file.size);
+        const sizeClass = file.size <= MAX_FILE_SIZE ? 'text-success' : 'text-danger';
+
+        row.innerHTML = `
+            <td>${escapeHtml(file.name)}</td>
+            <td class="${sizeClass}">${fileSize}</td>
+            <td><button type="button" class="btn btn-danger btn-sm rounded-4" onclick="removeFile(${index})">Remove</button></td>
+        `;
+        fileListElement.appendChild(row);
+    });
+
+    const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
+    const totalRow = document.createElement('tr');
+    totalRow.innerHTML = `
+        <td><strong>Total Size</strong></td>
+        <td colspan="2"><strong>${formatFileSize(totalSize)}</strong></td>
+    `;
+    fileListElement.appendChild(totalRow);
+}
+
+function removeFile(index) {
+    try {
+        selectedFiles.splice(index, 1);
+        const dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => dataTransfer.items.add(file));
+        const fileInput = document.getElementById('files');
+        if (fileInput) {
+            fileInput.files = dataTransfer.files;
+        }
+        showFileList();
+    } catch (error) {
+        console.error('Error removing file:', error);
+        alert('There was an error removing the file. Please try again.');
+    }
+}
+
+function formatFileSize(size) {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let i = 0;
+    while (size >= 1024 && i < units.length - 1) {
+        size /= 1024;
+        i++;
+    }
+    return `${size.toFixed(2)} ${units[i]}`;
+}
+
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function setupFileInput() {
+    const fileInput = document.getElementById('files');
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileSelect);
+        fileInput.dataset.maxFileSize = MAX_FILE_SIZE;
+    }
+}
+
+const MAX_CHECKLIST_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+function setupChecklistFileInputs() {
+    document.querySelectorAll('.file-input').forEach(input => {
+        input.addEventListener('change', function () {
+            const file = this.files[0];
+            const container = this.closest('.d-flex');
+            const fileNameSpan = container.querySelector('.file-name');
+            const checkIcon = container.querySelector('.fa-check-circle');
+
+            if (!file) {
+                fileNameSpan.textContent = 'No file chosen';
+                checkIcon.classList.add('d-none');
+                return;
+            }
+
+            if (file.size > MAX_CHECKLIST_FILE_SIZE) {
+                fileNameSpan.textContent = file.name + ' exceeds 10MB!';
+                fileNameSpan.classList.add('text-danger');
+                checkIcon.classList.add('d-none');
+                showAlert(`${file.name} exceeds the 10MB size limit.`);
+                this.value = ''; // Clear input
+            } else {
+                fileNameSpan.textContent = file.name;
+                fileNameSpan.classList.remove('text-danger');
+                checkIcon.classList.remove('d-none');
+            }
+        });
+    });
+}
+
+//BIND CONTROLS
+
+const fileInput = document.getElementById('files');
+const browseBtn = document.getElementById('btnBrowseFiles');
+
+if (fileInput && browseBtn) {
+    browseBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', handleFileSelect);
+}
+
+
+function fileOvertime(employeeId, selected_date) {
+    if (!employeeId || !selected_date) {
+        console.error("Missing employeeId or date");
+        return;
+    }
+
+    $.ajax({
+        url: '../fetch/wtm/wtm_dtr_details.php', // adjust path if needed
+        type: 'POST',
+        data: { employee_id: employeeId, date: selected_date },
+        dataType: 'json',
+        success: function (data) {
+            if (data.error) {
+                console.error(data.error);
+                return;
+            }
+
+            // Create a form dynamically
+            var form = $('<form>', {
+                method: 'POST',
+                action: 'wtm_file_overtime.php'
+            });
+
+            // format helpers
+            function formatDate(dateStr) {
+                if (!dateStr) return '';
+                const d = new Date(dateStr);
+                return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: '2-digit',
+                    year: 'numeric'
+                });
+            }
+
+            const formatTime = (timeStr) => (!timeStr || timeStr === '00:00:00') ? '' : timeStr.slice(0, 5);
+
+            let shiftdisplay = `[${data.shiftcode}]`;
+
+            if (data.shiftin && data.shiftout && data.shiftin.trim() !== "00:00:00" && data.shiftout.trim() !== "00:00:00") {
+                shiftdisplay += ` ${formatTime(data.shiftin)} - ${formatTime(data.shiftout)}`;
+            }
+
+            // Fields to send
+            var fields = {
+                employee_id: employeeId,
+                date: selected_date,
+                shiftDisplay: shiftdisplay || '',
+                shiftcode: data.shiftcode || '',
+                shiftstart: data.shiftin || '',
+                shiftend: data.shiftout || '',
+                timein: data.timein || '',
+                timeout: data.timeout || '',
+                overtime: data.overtime || ''
+            };
+
+            // Add hidden inputs
+            for (var key in fields) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: key,
+                    value: fields[key]
+                }).appendTo(form);
+            }
+
+            // Append form to body and submit
+            form.appendTo('body').submit();
+        },
+        error: function (xhr, status, error) {
+            console.error("DTR AJAX Error:", status, error);
+        }
+    });
+}

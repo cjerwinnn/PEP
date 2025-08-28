@@ -110,7 +110,7 @@ $position = isset($_SESSION['position']) ? $_SESSION['position'] : '';
                 </table>
             </div>
 
-            <div class="modal fade" id="DTRDetailModal" tabindex="-1" aria-labelledby="DTRDetailModalLabel" aria-hidden="false" data-bs-backdrop="static">
+            <div class="modal fade" id="DTRDetailModal" tabindex="-1" data-bs-backdrop="static">
                 <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content rounded-4 shadow border-0">
 
@@ -199,7 +199,7 @@ $position = isset($_SESSION['position']) ? $_SESSION['position'] : '';
             </div>
 
 
-            <div class="modal fade" id="ChangeShiftModal" tabindex="-1" aria-labelledby="ChangeShiftModallLabel" aria-hidden="false" data-bs-backdrop="static">
+            <div class="modal fade" id="ChangeShiftModal" tabindex="-1" data-bs-backdrop="static">
                 <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content rounded-4 shadow border-0">
 
@@ -277,7 +277,7 @@ $position = isset($_SESSION['position']) ? $_SESSION['position'] : '';
 
             <!-- FILE OVERTIME -->
 
-            <div class="modal fade" id="OvertimeModal" tabindex="-1" aria-labelledby="OvertimeModallLabel" aria-hidden="false" data-bs-backdrop="static">
+            <div class="modal fade" id="OvertimeModal" tabindex="-1" data-bs-backdrop="static">
                 <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content rounded-4 shadow border-0">
 
@@ -289,7 +289,7 @@ $position = isset($_SESSION['position']) ? $_SESSION['position'] : '';
                                     ← Back
                                 </button>
                                 <h5 class="mb-0 fw-bold">File Overtime</h5>
-                                <input hidden type="text" id="hidden_date_selected">
+                                <input hidden type="text" id="ot_hidden_date_selected">
                             </div>
 
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -301,19 +301,17 @@ $position = isset($_SESSION['position']) ? $_SESSION['position'] : '';
                             <!-- Date & Shift -->
                             <div class="d-flex justify-content-center align-items-center mb-3">
                                 <div id="modal-date" class="fw-semibold text-dark d-flex align-items-center">
-                                    <i class="bi bi-calendar3 me-2 text-primary text-center"></i>
+                                    <i class="fs-4 bi bi-calendar3 me-2 text-primary text-center"></i>
                                     <span id="modal-date-value" class="fs-4"></span>
                                 </div>
                             </div>
-
-
 
                             <!-- Attendance Section -->
                             <div class="mb-2">
                                 <div class="row g-3">
                                     <div class="col-md-12">
                                         <div class="p-3 rounded-3 border bg-light h-100">
-                                            <div class="text-muted mb-2">Shift Schedule: <span id="modal-in" class="fw-semibold mt-3">data</span></div>
+                                            <div class="text-muted mb-2">Shift Schedule: <span id="ot-shiftschedule" class="fw-semibold mt-3"></span></div>
 
                                             <div class="text-muted">Time In: <span id="ot-time-in" class="fw-semibold mt-3"></span></div>
                                             <div class="text-muted">Time Out: <span id="ot-time-out" class="fw-semibold mt-3"></span></div>
@@ -333,8 +331,7 @@ $position = isset($_SESSION['position']) ? $_SESSION['position'] : '';
                                             </div>
                                             <div class="text-muted">
                                                 File Overtime:
-                                                <input type="number" id="ot-file" class="text-center fw-bold form-control form-control-sm d-inline-block w-auto mt-1 rounded-4"
-                                                    value="" step="0.5" min="1.0">
+                                                <input type="number" id="ot-file" class="text-center fw-bold form-control form-control-sm d-inline-block w-auto mt-1 rounded-4">
                                             </div>
                                         </div>
                                     </div>
@@ -408,10 +405,10 @@ $position = isset($_SESSION['position']) ? $_SESSION['position'] : '';
                             <div class="mb-2">
                                 <div class="mb-2">
                                     <label for="req_reason" class="form-label small">
-                                        Reason <span class="text-danger">*</span>
+                                        Justification <span class="text-danger">*</span>
                                     </label>
                                     <textarea class="form-control rounded-4" id="req_reason" rows="2"
-                                        placeholder="Change shift schedule reason..."
+                                        placeholder="Overtime justification..."
                                         oninput="adjustTextareaHeight(this)"></textarea>
                                 </div>
                             </div>
