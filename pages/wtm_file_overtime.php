@@ -30,7 +30,7 @@ $timeout     = $_POST['timeout'] ?? '';
 $excess    = $_POST['overtime'] ?? '';
 ?>
 
-<input type="text" id="shiftdate_data" value="<?= $shiftdate ?>">
+<input type="hidden" id="shiftdate_data" value="<?= $shiftdate ?>">
 <input type="hidden" id="department_data" value="ADMIN SERVICES">
 <input type="hidden" id="area_data" value="IT">
 

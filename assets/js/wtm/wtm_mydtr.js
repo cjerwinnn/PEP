@@ -180,7 +180,7 @@ function loadAttendance(employeeId, startDate, endDate) {
                     <td class="text-center">${record.datein || ''}</td>
                     <td class="text-center">
                     ${record.timein === '00:00:00' || record.shiftin === '00:00:00'
-                        ? '<span class="text-danger small">No Time Out</span>'
+                        ? '<span class="text-danger small">No Time In</span>'
                         : record.timein.slice(0, 5)}
                     </td>
                     <td class="text-center small">${record.dateout || ''}</td>
@@ -196,7 +196,7 @@ function loadAttendance(employeeId, startDate, endDate) {
 
                     ${record.undertime === '0' ?
                         '<td class="text-center text-success"></td>' :
-                        `<td class="text-center text-danger small">${record.tardiness || '0'}</td>`}
+                        `<td class="text-center text-danger small">${record.undertime || '0'}</td>`}
 
                     ${record.totalmanhours === '0' || record.totalmanhours === '0.0' ?
                         '<td class="text-center text-success"></td>' :
@@ -287,7 +287,7 @@ function initializeFormModal(modalId = 'DTRDetailModal') {
                 // Shift
                 let shiftDisplay = (data.shiftin === '00:00:00' && data.shiftout === '00:00:00')
                     ? `<strong>[${data.shiftcode}]</strong>`
-                    : `<strong>[${data.shiftcode}]</strong> ${formatTime(data.shiftin)} - ${formatTime(data.shiftout)}`;
+                    : `<strong>[${data.shiftcode}] ${formatTime(data.shiftin)} - ${formatTime(data.shiftout)}</strong>`;
 
                 // Check if there is already a change request
                 fetch(`../fetch/wtm/wtm_check_changeshift_request.php?employeeid=${employeeid}&shiftdate=${selected_date}`)
@@ -310,7 +310,7 @@ function initializeFormModal(modalId = 'DTRDetailModal') {
                                         id="btnChangeShift" 
                                         data-bs-toggle="modal" 
                                         data-bs-target="#ChangeShiftModal">
-                                        View Change Shift Request
+                                        View Request
                                 </button>`;
                             shiftDisplay += `
                                 <span class="badge bg-warning ms-2">${result.status}</span>`;
@@ -320,7 +320,6 @@ function initializeFormModal(modalId = 'DTRDetailModal') {
                         formModal.querySelector('#modal-shift').innerHTML = `Shift Schedule:  ${shiftDisplay}`;
                     })
                     .catch(err => console.error(err));
-
 
                 current_shiftcode = data.shiftcode;
                 current_shiftstart = data.shiftin;
@@ -333,7 +332,10 @@ function initializeFormModal(modalId = 'DTRDetailModal') {
                 let attendanceInHTML = (data.datein || data.timein)
                     ? `<strong>${formatDate(data.datein)}</strong> ${timeInDisplay}` : '';
                 if (attendanceInHTML) {
-                    attendanceInHTML += ` <button type="button" class="btn btn-sm btn-outline-secondary rounded-4 ms-2" id="btnRequestManualIn">Request Manual In</button>`;
+                    attendanceInHTML += ` <button type="button" 
+                    class="btn btn-sm btn-outline-secondary rounded-4 ms-2" 
+                    onclick="ManualRequest('${employeeid}', '${selected_date}')"
+                    id="btnRequestManualIn">Request Manual In</button>`;
                 }
                 formModal.querySelector('#modal-in').innerHTML = attendanceInHTML;
 
@@ -346,25 +348,59 @@ function initializeFormModal(modalId = 'DTRDetailModal') {
                 }
                 formModal.querySelector('#modal-out').innerHTML = attendanceOutHTML;
 
-                formModal.querySelector('#modal-tardiness').innerHTML = `<strong>${data.tardiness} minute(s)</strong>`;
-                formModal.querySelector('#modal-undertime').innerHTML = `<strong>${data.undertime} minute(s)</strong>`;
-                formModal.querySelector('#modal-nightdiff').innerHTML = `<strong>${data.nightdiff} hour(s)</strong>`;
+                const tardinessDisplay = (data.tardiness == '0') ? '-' : `<strong>${data.tardiness} minute(s)</strong>`;
+                const undertimeDisplay = (data.undertime == '0') ? '-' : `<strong>${data.undertime} minute(s)</strong>`;
+                const nightdiffDisplay = (data.nightdiff == '0' || data.nightdiff == '0.0') ? '-' : `<strong>${data.nightdiff} minute(s)</strong>`;
 
-                let overtimeHTML = `<strong>${data.overtime} hour(s)</strong>`;
-                if (data.overtime > 0) {
-                    if (data.AllowedInOT == '1') {
-                        overtimeHTML += ` <button type="button" 
-                        onclick="fileOvertime('${employeeid}', '${selected_date}')"
-                        class="btn btn-sm btn-outline-success rounded-4 ms-2 mb-2 mt-2 small">
-                        File Overtime</button>`;
-                    }
-                }
-                if (data.AllowedInOT == '1') {
-                    if (data.OpentimeOT == '1') {
-                        overtimeHTML += ` <button type="button" class="btn btn-sm btn-outline-success rounded-4 ms-2 mt-2 small" id="btnFileOpentimeOvertime">File Opentime OT</button>`;
-                    }
-                }
-                formModal.querySelector('#modal-overtime').innerHTML = overtimeHTML;
+                formModal.querySelector('#modal-tardiness').innerHTML = tardinessDisplay;
+                formModal.querySelector('#modal-undertime').innerHTML = undertimeDisplay;
+                formModal.querySelector('#modal-nightdiff').innerHTML = nightdiffDisplay;
+
+                const overtimeDisplay = (data.overtime == '0') ? '-' : `<strong>${data.overtime} hour(s)</strong>`;
+
+                let overtimeHTML = overtimeDisplay;
+
+                // Check if there is already a change request
+                fetch(`../fetch/wtm/wtm_check_overtime_application.php?employeeid=${employeeid}&shiftdate=${selected_date}`)
+                    .then(response => response.json())
+                    .then(result => {
+                        if (parseInt(result.total) === 0) {
+
+                            if (data.overtime > 0) {
+                                if (data.AllowedInOT == '1') {
+                                    overtimeHTML += `<button type="button" 
+                                                        onclick="fileOvertime('${employeeid}', '${selected_date}')"
+                                                        class="btn btn-sm btn-outline-success rounded-4 ms-2 mb-2 mt-2 small">
+                                                        File Overtime</button>`;
+                                } else {
+                                    overtimeHTML += `<div class="alert alert-warning d-inline-block py-1 px-2 ms-2 mt-2 mb-0 small rounded-4">
+                                                            ⚠ Need Overtime Permission
+                                                        </div>`;
+                                }
+                            }
+                            if (data.AllowedInOT == '1') {
+                                if (data.OpentimeOT == '1') {
+                                    overtimeHTML += `<button type="button" 
+                                                    class="btn btn-sm btn-outline-success rounded-4 ms-2 mt-2 small" 
+                                                    id="btnFileOpentimeOvertime">
+                                                    File Opentime OT</button> `;
+                                }
+                            }
+                        } else {
+                            overtimeHTML += `
+                                    <button type ="button"
+                                    class="btn btn-sm btn-outline-primary rounded-4 ms-2 mt-2 small"
+                                    id= "btnChangeShift"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#ChangeShiftModal">
+                                        View Application
+                                    </button>`;
+                            overtimeHTML += `
+                                    <span class="badge bg-warning ms-2" > ${result.status}</span>`;
+                        }
+                        formModal.querySelector('#modal-overtime').innerHTML = overtimeHTML;
+                    })
+                    .catch(err => console.error(err));
 
                 // Remarks
                 formModal.querySelector('#modal-remarks').innerHTML = `<strong>${data.remarks}</strong>`;
@@ -426,7 +462,7 @@ function initializeShiftModal(modalId = 'ChangeShiftModal') {
                 let shiftText = `[${current_shiftcode}]`;
 
                 if (current_shiftstart && current_shiftend && current_shiftstart.trim() !== "00:00:00" && current_shiftend.trim() !== "00:00:00") {
-                    shiftText += ` ${formatTime(current_shiftstart)} - ${formatTime(current_shiftend)}`;
+                    shiftText += ` ${formatTime(current_shiftstart)} - ${formatTime(current_shiftend)} `;
                 }
 
                 formModal.querySelector('#modal-in').textContent = shiftText;
@@ -441,7 +477,7 @@ function initializeShiftModal(modalId = 'ChangeShiftModal') {
                         const dropdown = formModal.querySelector('#changeschedto_dropdown');
 
                         if (schedules.length === 0) {
-                            dropdown.innerHTML = `<option value="">No schedules found</option>`;
+                            dropdown.innerHTML = `<option value= "">No schedules found</option> `;
                             return;
                         }
 
@@ -459,10 +495,10 @@ function initializeShiftModal(modalId = 'ChangeShiftModal') {
                             const end = sc.shiftend && sc.shiftend.trim() !== "" ? sc.shiftend.slice(0, 5) : "";
                             const desc = sc.shiftdescription && sc.shiftdescription.trim() !== "" ? ` (${sc.shiftdescription})` : "";
 
-                            option.dataset.schedule = (start && end) ? `${start} - ${end}` : "00:00 - 00:00";
+                            option.dataset.schedule = (start && end) ? `${start} - ${end} ` : "00:00 - 00:00";
 
-                            let timePart = (start && end) ? `${start} - ${end}` : "";
-                            option.textContent = `[${sc.shiftcode}] ${timePart}${desc}`;
+                            let timePart = (start && end) ? `${start} - ${end} ` : "";
+                            option.textContent = `[${sc.shiftcode}] ${timePart}${desc} `;
 
                             dropdown.appendChild(option);
                         });
@@ -518,7 +554,7 @@ document.getElementById('SubmitChangeShift_Btn').addEventListener('click', funct
             const shiftDateObj = new Date(shiftDateStr);
 
             const currentShiftCode = current_shiftcode;
-            const currentShiftSched = `${current_shiftstart.slice(0, 5)} - ${current_shiftend.slice(0, 5)}`;
+            const currentShiftSched = `${current_shiftstart.slice(0, 5)} - ${current_shiftend.slice(0, 5)} `;
             const newShiftCode = document.getElementById('changeschedto_dropdown').value;
             const newShiftSched = document.querySelector("#changeschedto_dropdown option:checked").dataset.schedule;
             const reason = document.getElementById('req_reason').value.trim();
@@ -544,22 +580,22 @@ document.getElementById('SubmitChangeShift_Btn').addEventListener('click', funct
             // Generate request ID: employeeid-MMddyy-hhmmss
             const now = new Date();
             const pad = num => num.toString().padStart(2, '0');
-            const requestId = `${employeeId}-${pad(shiftDateObj.getMonth() + 1)}${pad(shiftDateObj.getDate())}${shiftDateObj.getFullYear().toString().slice(-2)}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+            const requestId = `${employeeId} -${pad(shiftDateObj.getMonth() + 1)}${pad(shiftDateObj.getDate())}${shiftDateObj.getFullYear().toString().slice(-2)} -${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())} `;
 
             const month = shiftDateObj.getMonth() + 1;
             const year = shiftDateObj.getFullYear();
 
-            let params = `requestid=${encodeURIComponent(requestId)}`;
-            params += `&month=${encodeURIComponent(month)}`;
-            params += `&year=${encodeURIComponent(year)}`;
-            params += `&employeeid=${encodeURIComponent(employeeId)}`;
-            params += `&shiftdate=${encodeURIComponent(shiftDateStr)}`;
-            params += `&currentshiftcode=${encodeURIComponent(currentShiftCode)}`;
-            params += `&currentshiftsched=${encodeURIComponent(currentShiftSched)}`;
-            params += `&newshiftcode=${encodeURIComponent(newShiftCode)}`;
-            params += `&newshiftsched=${encodeURIComponent(newShiftSched)}`;
-            params += `&reason=${encodeURIComponent(reason)}`;
-            params += `&status=PENDING`;
+            let params = `requestid = ${encodeURIComponent(requestId)} `;
+            params += `& month=${encodeURIComponent(month)} `;
+            params += `& year=${encodeURIComponent(year)} `;
+            params += `& employeeid=${encodeURIComponent(employeeId)} `;
+            params += `& shiftdate=${encodeURIComponent(shiftDateStr)} `;
+            params += `& currentshiftcode=${encodeURIComponent(currentShiftCode)} `;
+            params += `& currentshiftsched=${encodeURIComponent(currentShiftSched)} `;
+            params += `& newshiftcode=${encodeURIComponent(newShiftCode)} `;
+            params += `& newshiftsched=${encodeURIComponent(newShiftSched)} `;
+            params += `& reason=${encodeURIComponent(reason)} `;
+            params += `& status=PENDING`;
 
             let xhr = new XMLHttpRequest();
             xhr.open("POST", "../inserts/wtm/wtm_changeshift_request_insert.php", true);
@@ -588,266 +624,6 @@ document.getElementById('SubmitChangeShift_Btn').addEventListener('click', funct
         }
     });
 });
-
-
-function initializeOTModal(modalId = 'OvertimeModal') {
-    const formModal = document.getElementById(modalId);
-    if (!formModal) return;
-
-    formModal.addEventListener('show.bs.modal', function (event) {
-
-        const button = event.relatedTarget;
-        if (!button) return;
-
-        const area = document.getElementById('emp-area').value.trim();
-
-        if (!employeeid || !selected_date) {
-            console.error("Missing employeeId or date");
-            return;
-        }
-
-        document.getElementById('ot_hidden_date_selected').value = selected_date;
-
-        // 1. Fetch Employee DTR Details
-        $.ajax({
-            url: '../fetch/wtm/wtm_dtr_details.php',
-            type: 'POST',
-            data: { employee_id: employeeid, date: selected_date },
-            dataType: 'json',
-            success: function (data) {
-                if (data.error) {
-                    console.error(data.error);
-                    return;
-                }
-
-                // format helpers
-                function formatDate(dateStr) {
-                    if (!dateStr) return '';
-                    const d = new Date(dateStr);
-                    return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: '2-digit',
-                        year: 'numeric'
-                    });
-                }
-                const formatTime = (timeStr) => (!timeStr || timeStr === '00:00:00') ? '' : timeStr.slice(0, 5);
-
-                // Fill modal with DTR data
-                formModal.querySelector('#modal-date-value').textContent = formatDate(selected_date) + ' ' + data.dayofweek;
-                let shiftText = `[${current_shiftcode}]`;
-
-                if (current_shiftstart && current_shiftend && current_shiftstart.trim() !== "00:00:00" && current_shiftend.trim() !== "00:00:00") {
-                    shiftText += ` ${formatTime(current_shiftstart)} - ${formatTime(current_shiftend)}`;
-                }
-
-                $.ajax({
-                    url: '../fetch/wtm/wtm_overtime_types.php',
-                    type: 'POST',
-                    dataType: 'json',
-                    success: function (ot_types) {
-                        const dropdown = formModal.querySelector('#overtimetype_dropdown');
-
-                        if (ot_types.length === 0) {
-                            dropdown.innerHTML = `<option value="">No Overtime Types</option>`;
-                            return;
-                        }
-
-                        dropdown.innerHTML = '<option value="" disabled selected>Select a type...</option>';
-
-                        ot_types.forEach(ott => {
-                            const option = document.createElement('option');
-                            option.value = ott.ottype + ' - ' + ott.description;
-                            option.textContent = ott.ottype + ' - ' + ott.description;
-                            dropdown.appendChild(option);
-                        });
-
-
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Schedule AJAX Error:", status, error);
-                    }
-                });
-
-                formModal.querySelector('#ot-shiftschedule').innerHTML = shiftText;
-                formModal.querySelector('#ot-time-in').innerHTML = formatTime(data.timein);
-                formModal.querySelector('#ot-time-out').innerHTML = formatTime(data.timeout);
-                formModal.querySelector('#ot-excess').innerHTML = data.overtime;
-
-                const ot_file = document.getElementById('ot-file');
-                ot_file.value = data.overtime;
-                ot_file.max = data.overtime;
-                ot_file.min = 1.0;
-                ot_file.step = 0.5;
-
-            },
-            error: function (xhr, status, error) {
-                console.error("DTR AJAX Error:", status, error);
-            }
-        });
-    });
-}
-
-initializeOTModal();
-
-//OT ATTACHMENTS
-
-// ======= File Upload & Preview =======
-let selectedFiles = [];
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
-function handleFileSelect(event) {
-    const fileInput = event.target;
-    const files = Array.from(fileInput.files);
-    let errorMessages = [];
-    let successCount = 0;
-
-    files.forEach(file => {
-        if (file.size > MAX_FILE_SIZE) {
-            errorMessages.push(`${file.name} (${formatFileSize(file.size)}) exceeds the 10MB size limit`);
-            return;
-        }
-
-        if (!selectedFiles.some(existing => existing.name === file.name && existing.size === file.size)) {
-            selectedFiles.push(file);
-            successCount++;
-        }
-    });
-
-    fileInput.value = '';
-
-    if (errorMessages.length > 0) {
-        errorMessages.forEach(msg => showAlert(msg, 'error'));
-    }
-
-    if (successCount > 0) {
-        showSuccess(`Successfully added ${successCount} file${successCount > 1 ? 's' : ''}.`);
-    }
-
-    showFileList();
-}
-
-function showFileList() {
-    const fileListElement = document.getElementById('fileList')?.getElementsByTagName('tbody')[0];
-    const attachmentList = document.getElementById('attachment-list');
-
-    if (!fileListElement || !attachmentList) return;
-
-    fileListElement.innerHTML = '';
-
-    if (selectedFiles.length === 0) {
-        attachmentList.style.display = 'none';
-        return;
-    }
-
-    attachmentList.style.display = 'block';
-
-    selectedFiles.forEach((file, index) => {
-        const row = document.createElement('tr');
-        row.id = `file-${index}`;
-
-        const fileSize = formatFileSize(file.size);
-        const sizeClass = file.size <= MAX_FILE_SIZE ? 'text-success' : 'text-danger';
-
-        row.innerHTML = `
-            <td>${escapeHtml(file.name)}</td>
-            <td class="${sizeClass}">${fileSize}</td>
-            <td><button type="button" class="btn btn-danger btn-sm rounded-4" onclick="removeFile(${index})">Remove</button></td>
-        `;
-        fileListElement.appendChild(row);
-    });
-
-    const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
-    const totalRow = document.createElement('tr');
-    totalRow.innerHTML = `
-        <td><strong>Total Size</strong></td>
-        <td colspan="2"><strong>${formatFileSize(totalSize)}</strong></td>
-    `;
-    fileListElement.appendChild(totalRow);
-}
-
-function removeFile(index) {
-    try {
-        selectedFiles.splice(index, 1);
-        const dataTransfer = new DataTransfer();
-        selectedFiles.forEach(file => dataTransfer.items.add(file));
-        const fileInput = document.getElementById('files');
-        if (fileInput) {
-            fileInput.files = dataTransfer.files;
-        }
-        showFileList();
-    } catch (error) {
-        console.error('Error removing file:', error);
-        alert('There was an error removing the file. Please try again.');
-    }
-}
-
-function formatFileSize(size) {
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    let i = 0;
-    while (size >= 1024 && i < units.length - 1) {
-        size /= 1024;
-        i++;
-    }
-    return `${size.toFixed(2)} ${units[i]}`;
-}
-
-function escapeHtml(unsafe) {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-function setupFileInput() {
-    const fileInput = document.getElementById('files');
-    if (fileInput) {
-        fileInput.addEventListener('change', handleFileSelect);
-        fileInput.dataset.maxFileSize = MAX_FILE_SIZE;
-    }
-}
-
-const MAX_CHECKLIST_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
-function setupChecklistFileInputs() {
-    document.querySelectorAll('.file-input').forEach(input => {
-        input.addEventListener('change', function () {
-            const file = this.files[0];
-            const container = this.closest('.d-flex');
-            const fileNameSpan = container.querySelector('.file-name');
-            const checkIcon = container.querySelector('.fa-check-circle');
-
-            if (!file) {
-                fileNameSpan.textContent = 'No file chosen';
-                checkIcon.classList.add('d-none');
-                return;
-            }
-
-            if (file.size > MAX_CHECKLIST_FILE_SIZE) {
-                fileNameSpan.textContent = file.name + ' exceeds 10MB!';
-                fileNameSpan.classList.add('text-danger');
-                checkIcon.classList.add('d-none');
-                showAlert(`${file.name} exceeds the 10MB size limit.`);
-                this.value = ''; // Clear input
-            } else {
-                fileNameSpan.textContent = file.name;
-                fileNameSpan.classList.remove('text-danger');
-                checkIcon.classList.remove('d-none');
-            }
-        });
-    });
-}
-
-//BIND CONTROLS
-
-const fileInput = document.getElementById('files');
-const browseBtn = document.getElementById('btnBrowseFiles');
-
-if (fileInput && browseBtn) {
-    browseBtn.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', handleFileSelect);
-}
 
 
 function fileOvertime(employeeId, selected_date) {
@@ -889,7 +665,8 @@ function fileOvertime(employeeId, selected_date) {
             let shiftdisplay = `[${data.shiftcode}]`;
 
             if (data.shiftin && data.shiftout && data.shiftin.trim() !== "00:00:00" && data.shiftout.trim() !== "00:00:00") {
-                shiftdisplay += ` ${formatTime(data.shiftin)} - ${formatTime(data.shiftout)}`;
+                shiftdisplay += ` ${formatTime(data.shiftin)
+                    } - ${formatTime(data.shiftout)} `;
             }
 
             // Fields to send
@@ -900,7 +677,86 @@ function fileOvertime(employeeId, selected_date) {
                 shiftcode: data.shiftcode || '',
                 shiftstart: data.shiftin || '',
                 shiftend: data.shiftout || '',
+                datein: data.datein || '',
                 timein: data.timein || '',
+                dateout: data.dateout || '',
+                timeout: data.timeout || '',
+                overtime: data.overtime || ''
+            };
+
+            // Add hidden inputs
+            for (var key in fields) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: key,
+                    value: fields[key]
+                }).appendTo(form);
+            }
+
+            // Append form to body and submit
+            form.appendTo('body').submit();
+        },
+        error: function (xhr, status, error) {
+            console.error("DTR AJAX Error:", status, error);
+        }
+    });
+}
+
+
+function ManualRequest(employeeId, selected_date) {
+    if (!employeeId || !selected_date) {
+        console.error("Missing employeeId or date");
+        return;
+    }
+
+    $.ajax({
+        url: '../fetch/wtm/wtm_dtr_details.php', // adjust path if needed
+        type: 'POST',
+        data: { employee_id: employeeId, date: selected_date },
+        dataType: 'json',
+        success: function (data) {
+            if (data.error) {
+                console.error(data.error);
+                return;
+            }
+
+            // Create a form dynamically
+            var form = $('<form>', {
+                method: 'POST',
+                action: 'wtm_manualattendance_request.php'
+            });
+
+            // format helpers
+            function formatDate(dateStr) {
+                if (!dateStr) return '';
+                const d = new Date(dateStr);
+                return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: '2-digit',
+                    year: 'numeric'
+                });
+            }
+
+            const formatTime = (timeStr) => (!timeStr || timeStr === '00:00:00') ? '' : timeStr.slice(0, 5);
+
+            let shiftdisplay = `[${data.shiftcode}]`;
+
+            if (data.shiftin && data.shiftout && data.shiftin.trim() !== "00:00:00" && data.shiftout.trim() !== "00:00:00") {
+                shiftdisplay += ` ${formatTime(data.shiftin)
+                    } - ${formatTime(data.shiftout)} `;
+            }
+
+            // Fields to send
+            var fields = {
+                employee_id: employeeId,
+                date: selected_date,
+                shiftDisplay: shiftdisplay || '',
+                shiftcode: data.shiftcode || '',
+                shiftstart: data.shiftin || '',
+                shiftend: data.shiftout || '',
+                datein: data.datein || '',
+                timein: data.timein || '',
+                dateout: data.dateout || '',
                 timeout: data.timeout || '',
                 overtime: data.overtime || ''
             };

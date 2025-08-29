@@ -126,13 +126,13 @@ $position = isset($_SESSION['position']) ? $_SESSION['position'] : '';
                             <!-- Date & Shift -->
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div id="modal-date" class="fw-semibold text-dark d-flex align-items-center me-2">
-                                    <i class="bi bi-calendar3 me-2 text-primary"></i>
-                                    <span id="modal-date-value" class="fs-6"></span>
+                                    <i class="fs-4 bi bi-calendar3 me-2 text-primary"></i>
+                                    <span id="modal-date-value" class="fs-4"></span>
                                 </div>
 
                                 <!-- Shift -->
                                 <div id="modal-shift"
-                                    class="px-3 py-2 rounded-pill fw-semibold bg-muted text-dark shadow-sm small">
+                                    class="fs-6 px-3 py-2 rounded-pill bg-muted text-dark shadow-sm">
                                 </div>
                             </div>
 

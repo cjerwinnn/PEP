@@ -56,22 +56,6 @@ function showSuccess(message) {
     }, 2000);
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    const otInput = document.getElementById('ot-file');
-    if (!otInput) return;
-
-    otInput.value = parseFloat(otInput.value).toFixed(1);
-
-    otInput.addEventListener('input', function () {
-        let val = parseFloat(this.value);
-        if (isNaN(val)) val = 0;
-
-        val = Math.round(val * 2) / 2;
-        this.value = val.toFixed(1);
-    });
-});
-
-
 //=====SUBMIT CHANGE SCHED REQUEST =====//
 
 document.getElementById('SubmitChangeShift_Btn').addEventListener('click', function () {
@@ -239,3 +223,103 @@ function uploadSelectedFiles(overtimeid, employeeid) {
             alert('File upload failed.');
         });
 }
+
+//OVERTIME
+
+document.getElementById('schedule-date-in').addEventListener('change', function () {
+    DTR_Tardiness();
+});
+
+document.getElementById('schedule-time-in').addEventListener('change', function () {
+    DTR_Tardiness();
+});
+
+//UNDERTIME
+
+document.getElementById('schedule-date-out').addEventListener('change', function () {
+    DTR_Undertime();
+    DTR_Excess();
+    DTR_NightDiff();
+});
+
+document.getElementById('schedule-time-out').addEventListener('change', function () {
+    DTR_Undertime();
+    DTR_Excess();
+    DTR_NightDiff();
+});
+
+
+function DTR_Tardiness() {
+    const shiftdate = document.getElementById('shiftdate_data');
+    const shiftin = document.getElementById('shiftin_data');
+    const shiftout = document.getElementById('shiftout_data');
+    const datein = document.getElementById('schedule-date-in');
+    const timein = document.getElementById('schedule-time-in');
+
+    if (!datein.value || !timein.value) {
+        document.getElementById('modal-tardiness').textContent = '-';
+    } else {
+        let tardiness = computeTardiness(shiftdate.value, shiftin.value, shiftout.value, datein.value, timein.value);
+        const tardinessDisplay = (tardiness >= 0) ? `${tardiness} minute(s)` : '-';
+        document.getElementById('modal-tardiness').textContent = tardinessDisplay;
+    }
+}
+
+function DTR_Undertime() {
+    const shiftdate = document.getElementById('shiftdate_data');
+    const shiftin = document.getElementById('shiftin_data');
+    const shiftout = document.getElementById('shiftout_data');
+    const dateout = document.getElementById('schedule-date-out');
+    const timeout = document.getElementById('schedule-time-out');
+
+    if (!dateout.value || !timeout.value) {
+        document.getElementById('modal-undertime').textContent = '-';
+    } else {
+        let undertime = computeUndertime(shiftdate.value, shiftin.value, shiftout.value, dateout.value, timeout.value);
+        const undertimeDisplay = (undertime >= 0) ? `${undertime} minute(s)` : '-';
+        document.getElementById('modal-undertime').textContent = undertimeDisplay;
+    }
+}
+
+
+function DTR_Excess() {
+    const shiftdate = document.getElementById('shiftdate_data');
+    const shiftin = document.getElementById('shiftin_data');
+    const shiftout = document.getElementById('shiftout_data');
+    const dateout = document.getElementById('schedule-date-out');
+    const timeout = document.getElementById('schedule-time-out');
+
+    if (!dateout.value || !timeout.value) {
+        document.getElementById('modal-overtime').textContent = '-';
+    } else {
+        let excesstime = computeOvertime(shiftdate.value, shiftin.value, shiftout.value, dateout.value, timeout.value);
+        const ExcessDisplay = (excesstime >= 0) ? `${excesstime} Hour(s)` : '-';
+        document.getElementById('modal-overtime').textContent = ExcessDisplay;
+    }
+}
+
+function DTR_NightDiff() {
+    const datein = document.getElementById('schedule-date-in');
+    const dateout = document.getElementById('schedule-date-out');
+    const timein = document.getElementById('schedule-time-in');
+    const timeout = document.getElementById('schedule-time-out');
+    const ND_timeIn = new Date(`${datein.value}T${timein.value}`);
+    const ND_timeOut = new Date(`${dateout.value}T${timeout.value}`);
+
+    // const nd1Hours = roundToHalfMax8(ndresult.nd1);
+    // const nd2Hours = roundToHalfMax8(ndresult.nd2);
+
+    if (!timein.value || !timeout.value) {
+        document.getElementById('modal-nightdiff').textContent = '-';
+    } else {
+        let ndresult = calculateNightDiff(ND_timeIn, ND_timeOut);
+        const totalNightDiff = roundToHalfMax8(ndresult.totalND);
+        const NightDiffDisplay = (totalNightDiff >= 0) ? `${totalNightDiff} Hour(s)` : '-';
+        document.getElementById('modal-nightdiff').textContent = totalNightDiff;
+    }
+}
+
+
+
+
+
