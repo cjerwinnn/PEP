@@ -86,21 +86,19 @@ function computeOvertime(shiftDate, shiftStart, shiftOut, dateOut, timeOut) {
 }
 
 function calculateNightDiff(timeIn, timeOut) {
-
     let ndStart1 = new Date(timeIn);
-    ndStart1.setHours(22, 0, 0, 0); // 22:00 of same day
+    ndStart1.setHours(22, 0, 0, 0);
 
     let ndEnd1 = new Date(timeIn);
-    ndEnd1.setHours(24, 0, 0, 0); // still midnight
+    ndEnd1.setHours(24, 0, 0, 0);
 
     let ndStart2 = new Date(timeIn);
-    ndStart2.setDate(ndStart2.getDate() + 1); // next day
-    ndStart2.setHours(0, 0, 0, 0); // 00:00 next day
+    ndStart2.setDate(ndStart2.getDate() + 1);
+    ndStart2.setHours(0, 0, 0, 0);
 
     let ndEnd2 = new Date(ndStart2);
-    ndEnd2.setHours(6, 0, 0, 0); // 06:00 next day
+    ndEnd2.setHours(6, 0, 0, 0);
 
-    // Helper function to get overlapping milliseconds between two intervals
     function getOverlap(startA, endA, startB, endB) {
         let start = startA > startB ? startA : startB;
         let end = endA < endB ? endA : endB;
@@ -110,17 +108,102 @@ function calculateNightDiff(timeIn, timeOut) {
     let nd1Millis = getOverlap(timeIn, timeOut, ndStart1, ndEnd1);
     let nd2Millis = getOverlap(timeIn, timeOut, ndStart2, ndEnd2);
 
-    // Total ND time in hours
-    let totalNDHours = (nd1Millis + nd2Millis) / (1000 * 60 * 60);
+    let nd1Hours = nd1Millis / (1000 * 60 * 60);
+    let nd2Hours = nd2Millis / (1000 * 60 * 60);
+
+    function adjustND(num) {
+        if (num < 1) return 0;  // discard if less than 1 hr
+        return Math.floor(num * 2) / 2; // round down to nearest 0.5
+    }
+
+    nd1Hours = adjustND(nd1Hours);
+    nd2Hours = adjustND(nd2Hours);
+
+    let totalND = nd1Hours + nd2Hours;
+    if (totalND > 8) totalND = 8;
 
     return {
-        nd1: nd1Millis / (1000 * 60 * 60),
-        nd2: nd2Millis / (1000 * 60 * 60),
-        totalND: totalNDHours
+        nd1: nd1Hours,
+        nd2: nd2Hours,
+        totalND: totalND
     };
 }
+
 
 function roundToHalfMax8(num) {
     let rounded = Math.round(num * 2) / 2;
     return Math.min(rounded, 8);
 }
+
+async function GetHoliday(date) {
+    const response = await fetch(`../fetch/wtm/wtm_check_date_ifholiday.php?date=${date}`);
+    const text = await response.text();
+
+    if (text.trim() === "") {
+        return null; // no holiday
+    }
+
+    const parts = text.split("|");
+    return { name: parts[0], type: parts[1] };
+}
+
+async function GetDTRRemarks(shiftdate, shiftcode, shiftin, shiftout, timein, timeout, TMH_Value, payrolltype) {
+    let remdetails = '';
+    let tcount = 0;
+
+    const holiday = await GetHoliday(shiftdate);
+
+    if (holiday) {
+        remdetails = `${holiday.name} (${holiday.type})`;
+
+        if (holiday.type === 'LEGAL') {
+            if (payrolltype === 'DAILY') {
+                if (timein === '' && timeout === '') {
+                    tcount = 1.0;
+                    TMH_Value = 0;
+                } else {
+                    tcount = 1.0;
+                    TMH_Value = 8;
+                }
+            } else if (payrolltype === 'MONTHLY') {
+                if (timein === '' || timeout === '') {
+                    tcount = 0;
+                    TMH_Value = 0;
+                } else {
+                    tcount = 1;
+                    TMH_Value = 8;
+                }
+            } else {
+                if (TMH_Value >= 8) {
+                    tcount = 1.0;
+                } else if (TMH_Value >= 4 && TMH_Value < 8) {
+                    tcount = 0.5;
+                } else {
+                    tcount = 0;
+                }
+            }
+        }
+    } else {
+        if (shiftin && shiftout && (timein === '' && timeout === '')) {
+            remdetails = 'Absent';
+        } else if (shiftcode === 'NS') {
+            remdetails = 'No Schedule';
+        } else if (shiftcode === '0DO' && (timein === '' || timeout === '')) {
+            remdetails = 'Rest Day';
+        } else {
+            remdetails = '';
+        }
+
+        if (!timein || !timeout || timein === '' || timeout === '') {
+            tcount = 0;
+            TMH_Value = 0;
+        } else {
+            tcount = 1.0;
+            TMH_Value = 8;
+        }
+            
+    }
+
+    return { remdetails, tcount, TMH_Value };
+}
+

@@ -141,20 +141,39 @@ $position = isset($_SESSION['position']) ? $_SESSION['position'] : '';
                             <div class="mb-4">
                                 <h6 class="fw-bold mb-3">Attendance</h6>
                                 <div class="row g-3">
+
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="row g-3">
+                                    <!-- Time In -->
                                     <div class="col-md-6">
-                                        <div class="p-3 rounded-3 border bg-light h-100">
-                                            <div class="small text-muted">Time In</div>
-                                            <div id="modal-in" class="fw-semibold mt-1"></div>
+                                        <div class="card shadow-sm rounded-4 h-100">
+                                            <div class="card-body text-center">
+                                                <div class="small text-muted">Time In</div>
+                                                <div id="modal-in" class="fw-semibold fs-4 mt-2 text-primary"></div>
+                                            </div>
                                         </div>
                                     </div>
+
+                                    <!-- Time Out -->
                                     <div class="col-md-6">
-                                        <div class="p-3 rounded-3 border bg-light h-100">
-                                            <div class="small text-muted">Time Out</div>
-                                            <div id="modal-out" class="fw-semibold mt-1"></div>
+                                        <div class="card shadow-sm rounded-4 h-100">
+                                            <div class="card-body text-center">
+                                                <div class="small text-muted">Time Out</div>
+                                                <div id="modal-out" class="fw-semibold fs-4 mt-2 text-danger"></div>
+                                            </div>
                                         </div>
+                                    </div>
+
+                                    <!-- Request Button -->
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-center mt-1" id="modal-attendance-btn"></div>
                                     </div>
                                 </div>
                             </div>
+
 
                             <!-- Performance Section -->
                             <div class="mb-4">
@@ -274,11 +293,8 @@ $position = isset($_SESSION['position']) ? $_SESSION['position'] : '';
                 </div>
             </div>
 
-
-            <!-- FILE OVERTIME -->
-
-            <div class="modal fade" id="OvertimeModal" tabindex="-1" data-bs-backdrop="static">
-                <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal fade" id="OvertimeApplicationsModal" tabindex="-1" data-bs-backdrop="static">
+                <div class="modal-dialog modal-dialog-centered modal-xl">
                     <div class="modal-content rounded-4 shadow border-0">
 
                         <!-- Header -->
@@ -288,8 +304,8 @@ $position = isset($_SESSION['position']) ? $_SESSION['position'] : '';
                                 <button class="btn btn-outline-secondary btn-sm rounded-4 me-3" data-bs-toggle="modal" data-bs-target="#DTRDetailModal">
                                     ← Back
                                 </button>
-                                <h5 class="mb-0 fw-bold">File Overtime</h5>
-                                <input hidden type="text" id="ot_hidden_date_selected">
+                                <h5 class="mb-0 ms-3 text-muted text-center">Overtime List</h5>
+                                <input hidden type="text" id="hidden_date_selected">
                             </div>
 
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -298,125 +314,34 @@ $position = isset($_SESSION['position']) ? $_SESSION['position'] : '';
                         <!-- Body -->
                         <div class="modal-body p-4">
 
-                            <!-- Date & Shift -->
-                            <div class="d-flex justify-content-center align-items-center mb-3">
-                                <div id="modal-date" class="fw-semibold text-dark d-flex align-items-center">
-                                    <i class="fs-4 bi bi-calendar3 me-2 text-primary text-center"></i>
-                                    <span id="modal-date-value" class="fs-4"></span>
-                                </div>
-                            </div>
-
-                            <!-- Attendance Section -->
-                            <div class="mb-2">
-                                <div class="row g-3">
-                                    <div class="col-md-12">
-                                        <div class="p-3 rounded-3 border bg-light h-100">
-                                            <div class="text-muted mb-2">Shift Schedule: <span id="ot-shiftschedule" class="fw-semibold mt-3"></span></div>
-
-                                            <div class="text-muted">Time In: <span id="ot-time-in" class="fw-semibold mt-3"></span></div>
-                                            <div class="text-muted">Time Out: <span id="ot-time-out" class="fw-semibold mt-3"></span></div>
-
-                                        </div>
+                            <div class="p-3 rounded-3 border bg-light h-100">
+                                <!-- Date & Shift -->
+                                <div class="d-flex justify-content-center align-items-center mb-3">
+                                    <div id="ot-date" class="fw-semibold text-dark d-flex align-items-center">
+                                        <i class="fs-4 bi bi-calendar3 me-2 text-primary text-center"></i>
+                                        <span id="modal-date-value" class="fs-4"></span>
                                     </div>
                                 </div>
+
+                                <div class="text-center text-muted mb-2">Shift Schedule: <span id="modal-in" class="fw-semibold mt-3"></span></div>
                             </div>
-
-                            <div class="mb-2">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="p-3 rounded-3 border bg-light h-100">
-
-                                            <div class="text-muted">
-                                                Excess: <span id="ot-excess" class="fw-semibold mt-3"></span>
-                                            </div>
-                                            <div class="text-muted">
-                                                File Overtime:
-                                                <input type="number" id="ot-file" class="text-center fw-bold form-control form-control-sm d-inline-block w-auto mt-1 rounded-4">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="p-3 rounded-3 border bg-light h-100">
-                                            <div class="small text-muted">Overtime Type<span class="text-danger"> *</span></div>
-                                            <select class="form-select rounded-4 mt-2" id="overtimetype_dropdown">
-                                                <option value="" selected disabled>Select a type...</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-2">
-                                <div class="row g-3">
-                                    <div class="col-md-12">
-                                        <div class="card shadow-sm rounded-4 overflow-hidden">
-                                            <div class="card-header bg-secondary text-white">
-                                                <h5 class="mb-0 text-center">Supporting Documents</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <form action="upload.php" method="post" enctype="multipart/form-data">
-                                                    <div class="mb-2 text-center">
-                                                        <input
-                                                            type="file"
-                                                            class="form-control"
-                                                            name="files[]"
-                                                            id="files"
-                                                            multiple
-                                                            required
-                                                            style="display: none;"
-                                                            accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png,.gif,.bmp,.tiff" />
-
-                                                        <button
-                                                            type="button"
-                                                            class="btn btn-outline-secondary rounded-4"
-                                                            id="btnBrowseFiles">
-                                                            <i class="lni lni-upload-1 me-2"></i> Browse Files
-                                                        </button>
-
-
-                                                        <p class="form-text text-danger fst-italic mt-2">You can select multiple files to upload. Allowed formats: PDF, Word, Excel, and Images (JPG, PNG, GIF, etc.).</p>
-                                                        <p class="form-text text-danger fst-italic fw-bold mb-0">Maximum of 10Mb per file.</p>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <div id="attachment-list" style="display: none;">
-                                                            <table id="fileList" class="table table-striped">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th scope="col">File Name</th>
-                                                                        <th scope="col">File Size</th>
-                                                                        <th scope="col">Action</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <!-- List of selected files will appear here -->
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-2">
-                                <div class="mb-2">
-                                    <label for="req_reason" class="form-label small">
-                                        Justification <span class="text-danger">*</span>
-                                    </label>
-                                    <textarea class="form-control rounded-4" id="req_reason" rows="2"
-                                        placeholder="Overtime justification..."
-                                        oninput="adjustTextareaHeight(this)"></textarea>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-center mb-2">
-                                <button type="button" class="btn btn-success btn-l rounded-4 mt-4" id="SubmitChangeShift_Btn">
-                                    Submit request
-                                </button>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover table-sm small"
+                                    id="wtm_shiftschedule_employeelist"
+                                    style="font-size: 0.875rem;">
+                                    <thead class="thead-light mb-4">
+                                        <tr class="bg-dark text-white text-center rounded-4">
+                                            <th class="bg-primary text-white" style="width: 20%;">Request ID</th>
+                                            <th class="bg-primary text-white" style="width: 10%;">Overtime Date</th>
+                                            <th class="bg-primary text-white" style="width: 5%;">Filed</th>
+                                            <th class="bg-primary text-white" style="width: 20%;">Type</th>
+                                            <th class="bg-primary text-white" style="width: 10%;">Status</th>
+                                            <th class="bg-primary text-white" style="width: 10%;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="employees_tbody"></tbody>
+                                </table>
                             </div>
 
                         </div>
@@ -424,9 +349,6 @@ $position = isset($_SESSION['position']) ? $_SESSION['position'] : '';
                     </div>
                 </div>
             </div>
-
-
-
 
         </div>
     </div>

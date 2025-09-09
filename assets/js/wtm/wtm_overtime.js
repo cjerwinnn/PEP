@@ -122,6 +122,7 @@ document.getElementById('SubmitChangeShift_Btn').addEventListener('click', funct
                     const OT_End = data.timeout.slice(0, 5);
                     const OT_type = document.getElementById('overtimetype_dropdown').value;
                     const reason = document.getElementById('req_reason').value.trim();
+                    const emp_area = document.getElementById('area_data').value;
 
                     if (FileOT.value > ExcessHRS) {
                         showAlert('Overtime hour(s) to be filed should not be more than excess hour(s).');
@@ -167,6 +168,7 @@ document.getElementById('SubmitChangeShift_Btn').addEventListener('click', funct
                     params += `&year=${encodeURIComponent(year)}`;
                     params += `&applicationtype=${encodeURIComponent(ApplicationType)}`;
                     params += `&employeeid=${encodeURIComponent(employeeId)}`;
+                    params += `&emp_area=${encodeURIComponent(emp_area)}`;
                     params += `&overtimedate=${encodeURIComponent(shiftDateStr)}`;
                     params += `&overtimestart=${encodeURIComponent(OT_Start)}`;
                     params += `&overtimeend=${encodeURIComponent(OT_End)}`;
@@ -195,6 +197,155 @@ document.getElementById('SubmitChangeShift_Btn').addEventListener('click', funct
         }
     });
 });
+
+
+// ======= File Upload & Preview =======
+let selectedFiles = [];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+function handleFileSelect(event) {
+    const fileInput = event.target;
+    const files = Array.from(fileInput.files);
+    let errorMessages = [];
+    let successCount = 0;
+
+    files.forEach(file => {
+        if (file.size > MAX_FILE_SIZE) {
+            errorMessages.push(`${file.name} (${formatFileSize(file.size)}) exceeds the 10MB size limit`);
+            return;
+        }
+
+        if (!selectedFiles.some(existing => existing.name === file.name && existing.size === file.size)) {
+            selectedFiles.push(file);
+            successCount++;
+        }
+    });
+
+    fileInput.value = '';
+
+    if (errorMessages.length > 0) {
+        errorMessages.forEach(msg => showAlert(msg, 'error'));
+    }
+
+    if (successCount > 0) {
+        showSuccess(`Successfully added ${successCount} file${successCount > 1 ? 's' : ''}.`);
+    }
+
+    showFileList();
+}
+
+function showFileList() {
+    const fileListElement = document.getElementById('fileList')?.getElementsByTagName('tbody')[0];
+    const attachmentList = document.getElementById('attachment-list');
+
+    if (!fileListElement || !attachmentList) return;
+
+    fileListElement.innerHTML = '';
+
+    if (selectedFiles.length === 0) {
+        attachmentList.style.display = 'none';
+        return;
+    }
+
+    attachmentList.style.display = 'block';
+
+    selectedFiles.forEach((file, index) => {
+        const row = document.createElement('tr');
+        row.id = `file-${index}`;
+
+        const fileSize = formatFileSize(file.size);
+        const sizeClass = file.size <= MAX_FILE_SIZE ? 'text-success' : 'text-danger';
+
+        row.innerHTML = `
+            <td>${escapeHtml(file.name)}</td>
+            <td class="${sizeClass}">${fileSize}</td>
+            <td><button type="button" class="btn btn-danger btn-sm rounded-4" onclick="removeFile(${index})">Remove</button></td>
+        `;
+        fileListElement.appendChild(row);
+    });
+
+    const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
+    const totalRow = document.createElement('tr');
+    totalRow.innerHTML = `
+        <td><strong>Total Size</strong></td>
+        <td colspan="2"><strong>${formatFileSize(totalSize)}</strong></td>
+    `;
+    fileListElement.appendChild(totalRow);
+}
+
+function removeFile(index) {
+    try {
+        selectedFiles.splice(index, 1);
+        const dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => dataTransfer.items.add(file));
+        const fileInput = document.getElementById('files');
+        if (fileInput) {
+            fileInput.files = dataTransfer.files;
+        }
+        showFileList();
+    } catch (error) {
+        console.error('Error removing file:', error);
+        alert('There was an error removing the file. Please try again.');
+    }
+}
+
+function formatFileSize(size) {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let i = 0;
+    while (size >= 1024 && i < units.length - 1) {
+        size /= 1024;
+        i++;
+    }
+    return `${size.toFixed(2)} ${units[i]}`;
+}
+
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function setupFileInput() {
+    const fileInput = document.getElementById('files');
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileSelect);
+        fileInput.dataset.maxFileSize = MAX_FILE_SIZE;
+    }
+}
+
+const MAX_CHECKLIST_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+function setupChecklistFileInputs() {
+    document.querySelectorAll('.file-input').forEach(input => {
+        input.addEventListener('change', function () {
+            const file = this.files[0];
+            const container = this.closest('.d-flex');
+            const fileNameSpan = container.querySelector('.file-name');
+            const checkIcon = container.querySelector('.fa-check-circle');
+
+            if (!file) {
+                fileNameSpan.textContent = 'No file chosen';
+                checkIcon.classList.add('d-none');
+                return;
+            }
+
+            if (file.size > MAX_CHECKLIST_FILE_SIZE) {
+                fileNameSpan.textContent = file.name + ' exceeds 10MB!';
+                fileNameSpan.classList.add('text-danger');
+                checkIcon.classList.add('d-none');
+                showAlert(`${file.name} exceeds the 10MB size limit.`);
+                this.value = ''; // Clear input
+            } else {
+                fileNameSpan.textContent = file.name;
+                fileNameSpan.classList.remove('text-danger');
+                checkIcon.classList.remove('d-none');
+            }
+        });
+    });
+}
 
 //Upload Attachments
 
@@ -238,4 +389,14 @@ function uploadSelectedFiles(overtimeid, employeeid) {
             console.error('Error uploading files:', error);
             alert('File upload failed.');
         });
+}
+
+//BIND CONTROLS
+
+const fileInput = document.getElementById('files');
+const browseBtn = document.getElementById('btnBrowseFiles');
+
+if (fileInput && browseBtn) {
+    browseBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', handleFileSelect);
 }

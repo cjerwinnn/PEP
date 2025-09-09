@@ -64,8 +64,6 @@ function loadEmployees(dept, area) {
   const month = monthDropdown.value;
   const year = yearDropdown.value;
 
-  console.log(`Department: ${dept}, Area: ${area}, Month: ${month}, Year: ${year}`);
-
   fetch(`../fetch/wtm/wtm_schedule_employeelist.php?department=${encodeURIComponent(dept)}&area=${encodeURIComponent(area)}&month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}`)
     .then(response => {
       if (!response.ok) throw new Error('Network response was not ok: ' + response.status);

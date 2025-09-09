@@ -30,6 +30,17 @@ $timeout     = $_POST['timeout'] ?? '';
 $excess    = $_POST['overtime'] ?? '';
 ?>
 
+<?php
+$stmt = $conn2->prepare("CALL WEB_OT_TYPE_LIST");
+$stmt->execute();
+$result = $stmt->get_result();
+
+$ot_types = [];
+while ($row = $result->fetch_assoc()) {
+    $ot_types[] = $row;
+}
+?>
+
 <input type="hidden" id="shiftdate_data" value="<?= $shiftdate ?>">
 <input type="hidden" id="department_data" value="ADMIN SERVICES">
 <input type="hidden" id="area_data" value="IT">
@@ -90,7 +101,6 @@ $excess    = $_POST['overtime'] ?? '';
                                     <i class="fs-4 bi bi-calendar3 me-2 text-primary text-center"></i>
                                     <span id="ot-date-value" class="fs-4"><?= $formattedDate ?></span>
                                 </div>
-
                             </div>
 
                             <div class="text-muted mb-2">Shift Schedule: <span id="ot-shiftschedule" class="fw-semibold mt-3"><?= $shiftDisplay ?></span></div>
@@ -126,8 +136,13 @@ $excess    = $_POST['overtime'] ?? '';
                     <div class="col-md-6">
                         <div class="p-3 rounded-3 border bg-light h-100">
                             <div class="small text-muted">Overtime Type<span class="text-danger"> *</span></div>
-                            <select class="form-select rounded-4 mt-2" id="overtimetype_dropdown">
+                            <select class="form-select rounded-4 mt-2" id="overtimetype_dropdown" name="overtimetype">
                                 <option value="" selected disabled>Select a type...</option>
+                                <?php foreach ($ot_types as $ot) : ?>
+                                    <option value="<?= htmlspecialchars($ot['ottype']) ?> - <?= htmlspecialchars($ot['description']) ?>">
+                                        <?= htmlspecialchars($ot['ottype']) ?> - <?= htmlspecialchars($ot['description']) ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                     </div>

@@ -370,7 +370,7 @@
                <div class="col-md-12 ms-auto mt-4" id="trail-section">
                    <div class="card shadow-sm rounded-4 overflow-hidden">
                        <div class="card-header bg-warning text-white">
-                           <h5 class="mb-0">Request Logs</h5>
+                           <h5 class="mb-0">Application Logs</h5>
                        </div>
                        <div class="card-body">
                            <div class="table-responsive">

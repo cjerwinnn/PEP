@@ -13,7 +13,7 @@ if (empty($employeeId) || empty($shiftDate)) {
 
 // Prepare statement
 $stmt = $conn2->prepare("
-    SELECT status
+    SELECT status, overtimeid
     FROM timekeeping_overtime_filed
     WHERE employeeid = ? AND overtimedate = ?
     ORDER BY datecreated DESC, timecreated DESC
@@ -26,12 +26,14 @@ $result = $stmt->get_result()->fetch_assoc();
 if ($result) {
     echo json_encode([
         "total" => 1,
-        "status" => $result['status']
+        "status" => $result['status'],
+        "overtimeid" => $result['overtimeid']
     ]);
 } else {
     echo json_encode([
         "total" => 0,
-        "status" => ""
+        "status" => "",
+        "overtimeid" => ""
     ]);
 }
 
